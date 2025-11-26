@@ -58,7 +58,7 @@ def calc_cathode_temp(voltage, current, k):
 
 
 class Reader(QtCore.QObject):
-    reader_result = QtCore.pyqtSignal(str, str)
+    reader_result = QtCore.pyqtSignal(dict, dict)
 
     def __init__(
         self,
@@ -149,7 +149,7 @@ class Reader(QtCore.QObject):
                 except:
                     thermocouple_data.update({f"CH{i}": 0.0 for i in range(self.thermocouple.thermocouple_ch_end + 1)})   
 
-            self.reader_result.emit(json.dumps(instrument_data), json.dumps(thermocouple_data))
+            self.reader_result.emit(instrument_data, thermocouple_data)
 
 
 class PLMControl(QtWidgets.QMainWindow):
@@ -355,8 +355,8 @@ class PLMControl(QtWidgets.QMainWindow):
             time_experiment=self.timeFormat,
             timestamp_abs=str(commit_time_timestamp),
             timestamp_experimental=self.timestamp_experimental,
-            instruments_values=self.instrument_json,
-            thermocouples_values=self.thermocouple_json
+            instruments_values=json.dumps(self.instrument_data),
+            thermocouples_values=json.dumps(self.thermocouple_data)
         )
         self.session.add(commit)
         self.session.commit()
@@ -573,11 +573,11 @@ class PLMControl(QtWidgets.QMainWindow):
                                              address=self.pressure_3_address)
 
     def get_values(self, instrument_value, thermocouple_value):
-        self.instrument_json   = instrument_value
-        self.thermocouple_json = thermocouple_value
+        self.instrument_data   = instrument_value
+        self.thermocouple_data = thermocouple_value
 
-    def display_values(self):
-        value = json.loads(self.instrument_json)
+    def display_values(self): 
+        value = self.instrument_data
         sample_voltage = value['sample_voltage']
         sample_current = value['sample_current']
         discharge_voltage = value['discharge_voltage']
@@ -595,7 +595,7 @@ class PLMControl(QtWidgets.QMainWindow):
         pressure_1 = value['pressure_1']
         pressure_2 = value['pressure_2']
         pressure_3 = value['pressure_3']
-        value_thermocouples = json.loads(self.thermocouple_json)
+        value_thermocouples = self.thermocouple_data
 
         self.ui_main.u_sample_actual.setText(str(sample_voltage))
         self.ui_main.i_sample_actual.setText(str(sample_current))
