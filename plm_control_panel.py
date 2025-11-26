@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 import json
 import pyvisa
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 from os import path
 from concurrent.futures import ThreadPoolExecutor
@@ -58,7 +58,7 @@ def calc_cathode_temp(voltage, current, k):
 
 
 class Reader(QtCore.QObject):
-    reader_result = QtCore.pyqtSignal(str)
+    reader_result = QtCore.pyqtSignal(str, str)
 
     def __init__(
         self,
@@ -94,8 +94,8 @@ class Reader(QtCore.QObject):
 
     def run(self) -> None:
         while True:
-            data     = {}
-            deadline = datetime.datetime.now() + datetime.timedelta(seconds = self.read_interval)
+            instrument_data   = {}
+            thermocouple_data = {}
 
             with ThreadPoolExecutor(max_workers = None) as executor:
                 sample_feature_current     = executor.submit(self.sample.get_current)
@@ -118,41 +118,38 @@ class Reader(QtCore.QObject):
 
                 # ----------------------------------------------------------------------------
 
-                data.update({"sample_current",     sample_feature_current.result()      })
-                data.update({"sample_voltage",     sample_feature_voltage.result()      })
-                data.update({"discharge_current",  discharge_feature_current.result()   })
-                data.update({"discharge_voltage",  discharge_feature_voltage.result()   })
-                data.update({"discharge_power",    discharge_feature_power.result()     })
-                data.update({"solenoid_current_1", solenoid_1_feature_current.result()  })
-                data.update({"solenoid_voltage_1", solenoid_1_feature_voltage.result()  })
-                data.update({"solenoid_current_2", solenoid_2_feature_current.result()  })
-                data.update({"solenoid_voltage_2", solenoid_2_feature_voltage.result()  })
-                data.update({"cathode_current",    cathode_feature_current.result()     })
-                data.update({"cathode_voltage",    cathode_feature_voltage.result()     })
-                data.update({"cathode_power",      cathode_feature_power.result()       })
-                data.update({"T_cathode",          calc_cathode_temp(
-                                                        voltage = cathode_feature_voltage.result(), 
-                                                        current = cathode_feature_current.result(), 
-                                                        k       = self.k)               })
-                data.update({"rrg_value",          rrg_feature_inlet.result()           })
-                data.update({"pressure_1",         pressure_1_feature.result()          })
-                data.update({"pressure_2",         pressure_2_feature.result()          })
-                data.update({"pressure_3",         pressure_3_feature.result()          })
+                instrument_data.update({"sample_current"     : sample_feature_current.result()      })
+                instrument_data.update({"sample_voltage"     : sample_feature_voltage.result()      })
+                instrument_data.update({"discharge_current"  : discharge_feature_current.result()   })
+                instrument_data.update({"discharge_voltage"  : discharge_feature_voltage.result()   })
+                instrument_data.update({"discharge_power"    : discharge_feature_power.result()     })
+                instrument_data.update({"solenoid_current_1" : solenoid_1_feature_current.result()  })
+                instrument_data.update({"solenoid_voltage_1" : solenoid_1_feature_voltage.result()  })
+                instrument_data.update({"solenoid_current_2" : solenoid_2_feature_current.result()  })
+                instrument_data.update({"solenoid_voltage_2" : solenoid_2_feature_voltage.result()  })
+                instrument_data.update({"cathode_current"    : cathode_feature_current.result()     })
+                instrument_data.update({"cathode_voltage"    : cathode_feature_voltage.result()     })
+                instrument_data.update({"cathode_power"      : cathode_feature_power.result()       })
+                instrument_data.update({"T_cathode"          : calc_cathode_temp(
+                                                                    voltage = cathode_feature_voltage.result(), 
+                                                                    current = cathode_feature_current.result(), 
+                                                                    k       = self.k)               })
+                instrument_data.update({"rrg_value"          : rrg_feature_inlet.result()           })
+                instrument_data.update({"pressure_1"         : pressure_1_feature.result()          })
+                instrument_data.update({"pressure_2"         : pressure_2_feature.result()          })
+                instrument_data.update({"pressure_3"         : pressure_3_feature.result()          })
 
-                thermocouple_data   = {}
-                thermocouple_values = thermocouple_feature.result()
-                for i in range(self.thermocouple.thermocouple_ch_end + 1):
-                    if thermocouple_values[i] > 1450.0: 
-                        thermocouple_data.update({f"CH{i}", 0.0})
-                    else:
-                        thermocouple_data.update({f"CH{i}", round(thermocouple_values[i], 2)}) 
-                data.update({"thermocouples", thermocouple_data})   
+                try:
+                    thermocouple_values = thermocouple_feature.result()
+                    for i in range(self.thermocouple.thermocouple_ch_end + 1):
+                        if thermocouple_values[i] > 1450.0: 
+                            thermocouple_data.update({f"CH{i}": 0.0})
+                        else:
+                            thermocouple_data.update({f"CH{i}": round(thermocouple_values[i], 2)}) 
+                except:
+                    thermocouple_data.update({f"CH{i}": 0.0 for i in range(self.thermocouple.thermocouple_ch_end + 1)})   
 
-            data.update({"timestamp": datetime.datetime.now().timestamp()})
-            self.reader_result.emit(json.dumps(data))
-
-            if datetime.datetime.now() >= deadline:
-                print(f"Reader exceeded deadline by {(datetime.datetime.now() - deadline).seconds} seconds")
+            self.reader_result.emit(json.dumps(instrument_data), json.dumps(thermocouple_data))
 
 
 class PLMControl(QtWidgets.QMainWindow):
@@ -352,6 +349,7 @@ class PLMControl(QtWidgets.QMainWindow):
         commit_time_timestamp = datetime.now().timestamp()
         commit_time = time.strftime("%H:%M:%S", commit_time)
         self.timestamp_experimental = str(self.timestamp_experimental)
+        
         commit = Instruments(
             time=commit_time,
             time_experiment=self.timeFormat,
@@ -574,8 +572,9 @@ class PLMControl(QtWidgets.QMainWindow):
         self.pressure_3 = VacuumeterERSTEVAK(ip=self.pressure_3_ip, port=self.pressure_3_port,
                                              address=self.pressure_3_address)
 
-    def get_values(self, value):
-        self.instrument_json = value
+    def get_values(self, instrument_value, thermocouple_value):
+        self.instrument_json   = instrument_value
+        self.thermocouple_json = thermocouple_value
 
     def display_values(self):
         value = json.loads(self.instrument_json)
@@ -596,7 +595,7 @@ class PLMControl(QtWidgets.QMainWindow):
         pressure_1 = value['pressure_1']
         pressure_2 = value['pressure_2']
         pressure_3 = value['pressure_3']
-        value_thermocouples = value['thermocouples']
+        value_thermocouples = json.loads(self.thermocouple_json)
 
         self.ui_main.u_sample_actual.setText(str(sample_voltage))
         self.ui_main.i_sample_actual.setText(str(sample_current))
