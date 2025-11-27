@@ -12,7 +12,7 @@ class SCPIInstrument:
     def __init__(self, rm, connection_type, ip, port, name, sleep_time=0.01):
         self.name = name  # название прибора
         self.isInitialized = bool()  # флаг инициализации
-        self.sleep_time = sleep_time  # интервал между командами
+        # self.sleep_time = sleep_time  # интервал между командами
         try:
             if connection_type == 'TCPIP':  # Первый способ установки соединения с прибором
                 self.instrument = rm.open_resource(f'TCPIP::{ip}::inst0::INSTR')
@@ -20,8 +20,7 @@ class SCPIInstrument:
                 self.instrument = rm.open_resource(f'TCPIP::{ip}::{port}::SOCKET')
                 self.instrument.write_termination = '\n'
                 self.instrument.read_termination = '\n'
-            #print(f'{self.name}')
-            #print(self.get_identification())
+            self.instrument.query_delay = sleep_time # задержка для команд
             print(f'(+) {self.name} initialized: {self.get_identification()}')
             self.isInitialized = True
 
@@ -29,14 +28,24 @@ class SCPIInstrument:
             self.instrument = None
             print(f'(!) {self.name} failed to initialize:\t{e}')
             self.IsInitialized = False
+    
+    def _query(self, command: str):
+        """
+        Обёртка над вызовом SCPI комманд
+        """
+        try:
+            self.instrument.lock()
+            self.instrument.query(command)
+            self.instrument.unlock()
+        except Exception as e:
+            raise ValueError(e) # временное error propagation
 
     def set_voltage(self, value: float):
         """
         Отправляет в прибор команду на установление напряжения, переданного в метод
         """
         try:
-            self.instrument.write(f'VOLTAGE {value}') #type:ignore
-            time.sleep(self.sleep_time)
+            self._query(f'VOLTAGE {value}')
         except Exception:
             pass
 
@@ -45,8 +54,7 @@ class SCPIInstrument:
         Отправляет в прибор команду на установление тока, переданного в метод
         """
         try:
-            self.instrument.write(f'CURRENT {value}')#type:ignore
-            time.sleep(self.sleep_time)
+            self._query(f'CURRENT {value}')
         except Exception:
             pass
 
@@ -55,8 +63,7 @@ class SCPIInstrument:
         Отправляет в прибор команду на установление мощности, переданного в метод
         """
         try:
-            self.instrument.write(f'POWER {value}')#type:ignore
-            time.sleep(self.sleep_time)
+            self._query(f'POWER {value}')
         except Exception:
             pass
 
@@ -65,7 +72,7 @@ class SCPIInstrument:
         Возвращает текущее напряжение на источнике питания
         """
         try:
-            return round(float(self.instrument.query('MEASURE:VOLTAGE?').strip('\x00')), 2)#type:ignore
+            return round(float(self._query('MEASURE:VOLTAGE?').strip('\x00')), 2)
         except:
             return 0.0
 
@@ -74,7 +81,7 @@ class SCPIInstrument:
         Возвращает текущий ток на источнике питания
         """
         try:
-            return round(float(self.instrument.query('MEASURE:CURRENT?').strip('\x00')), 2)#type:ignore
+            return round(float(self._query('MEASURE:CURRENT?').strip('\x00')), 2)
         except:
             return 0.0
 
@@ -83,7 +90,7 @@ class SCPIInstrument:
         Возвращает текущую мощность на источнике питания
         """
         try:
-            return round(float(self.instrument.query('MEASURE:POWER?').strip('\x00')), 2)#type:ignore
+            return round(float(self._query('MEASURE:POWER?').strip('\x00')), 2)
         except:
             return 0.0
 
@@ -92,7 +99,7 @@ class SCPIInstrument:
         Возвращает идентификацию прибора
         """
         try:   
-            return self.instrument.query('*IDN?')#type:ignore
+            return self._query('*IDN?')
         except:
             return 0.0
 
@@ -101,9 +108,7 @@ class SCPIInstrument:
         Включает выход источника питания, передаёт состояние выхода прибора (0-выход отключен, 1-выход включен)
         """
         try:
-            self.instrument.write('OUTPUT ON')#type:ignore
-            time.sleep(self.sleep_time)
-            return self.instrument.query('OUTPUT?')#type:ignore
+            self._query('OUTPUT ON')
         except Exception:
             print(f'{self.name}: Cannot set output to on')
 
@@ -112,9 +117,7 @@ class SCPIInstrument:
         Выключает выход источника питания, передаёт состояние выхода прибора (0-выход отключен, 1-выход включен)
         """
         try:
-            self.instrument.write('OUTPUT OFF')#type:ignore
-            time.sleep(self.sleep_time)
-            return self.instrument.query('OUTPUT?')#type:ignore
+            self._query('OUTPUT OFF')
         except Exception:
             print(f'{self.name}: Cannot set output to off')
 
@@ -123,9 +126,7 @@ class SCPIInstrument:
         Устанавливает прибор в состояние, при котором управление осуществляется с лицевой панели прибора
         """
         try:
-            self.instrument.write('SYSTEM:LOCAL')#type:ignore
-            time.sleep(self.sleep_time)
-            return f'{self.name}: SYSTEM:LOCAL'
+            self._query('SYSTEM:LOCAL')
         except Exception:
             print(f'{self.name}: Cannot set device to local mode')
 
@@ -135,9 +136,7 @@ class SCPIInstrument:
         воспринимать команды со сторонних программ
         """
         try:
-            self.instrument.write('SYSTEM:REMOTE')#type:ignore
-            time.sleep(self.sleep_time)
-            return f'{self.name}: SYSTEM:REMOTE'
+            self._query('SYSTEM:REMOTE')
         except Exception:
             print(f'{self.name}: Cannot set device to remote mode')
 
