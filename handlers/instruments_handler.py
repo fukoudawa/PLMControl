@@ -141,28 +141,6 @@ class SCPIInstrument:
             print(f'{self.name}: Cannot set device to remote mode')
 
 
-class PyrometerInstrument:
-    """
-    Класс, объединяющий методы для работы с пирометром через COM-порт
-    """
-    def __init__(self, port, baudrate):
-        self.isInitialized = bool()
-        try:
-            self.ser = serial.Serial(port=port, baudrate=baudrate)
-            self.ser.open()
-            print('(+) Pyrometer initialized')
-            self.isInitialized = True
-
-        except Exception:
-            self.ser = object
-            print('(!) Failed to initialize pyrometer')
-            self.isInitialized = False
-
-    def return_value_pyrometer(self):
-        value = self.ser.readline().decode('ascii') #type:ignore  # получаем от пирометра абракадабру и декодируем её в строку
-        return value[9:len(value)-3]                 # достаём из строки значение температуры на пирометре
-
-
 class RRGInstrument:
 
     def __init__(self, unit, method, port, baudrate):
