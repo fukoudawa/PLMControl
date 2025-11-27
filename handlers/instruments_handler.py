@@ -229,7 +229,7 @@ class RRGInstrument:
             self.flag_1 = map(str, self.flag_1_int)
             self.flag_1 = ''.join(self.flag_1)
             self.flag_1 = int(self.flag_1, 2)
-            self.client.write_register(2, self.flag_1, slave=self.unit) #type:ignore
+            self.client.write_register(2, self.flag_1, slave=self.unit) 
         except Exception:
             if self.isInitialized:
                 print('(ERROR) RRG: Set state has failed')
@@ -237,7 +237,7 @@ class RRGInstrument:
     def set_flow(self, value: int):
         try:
             value_to_rrg = value * 100
-            self.client.write_register(4, value_to_rrg, slave=self.unit) #type:ignore
+            self.client.write_register(4, value_to_rrg, slave=self.unit) 
             self._get_holding_registers()
             return self.holding_registers[4]
         except Exception:
@@ -283,7 +283,7 @@ class NIDAQInstrument:
         if thermal_unit == 'C':
             self.thermal_unit = constants.TemperatureUnits.DEG_C
         if thermal_unit == 'K':
-            self.thermal_unit = constants.TemperatureUnits.DEG_K #type:ignore
+            self.thermal_unit = constants.TemperatureUnits.K 
         try:
             self.task = Task()
             # try:
@@ -302,19 +302,23 @@ class NIDAQInstrument:
 
     def create_single_thermocouple(self):
         try:
-            self.task.ai_channels.add_ai_thrmcpl_chan(rf'{self.path}/ai{self.thermocouple_ch_start}', #type:ignore
-                                                      thermocouple_type=self.thermocouple_type,
-                                                      units=self.thermal_unit
-                                                      )
+            self.task.ai_channels.add_ai_thrmcpl_chan(
+                                                rf'{self.path}/ai{self.thermocouple_ch_start}', 
+                                                thermocouple_type=self.thermocouple_type,
+                                                units=self.thermal_unit,
+                                                cjc_source=constants.CJCSource.BUILT_IN
+                                                )
         except Exception:
             print(f'Thermocouple {self.name} does not created')
 
     def create_multiple_thermocouples(self):
         try:
-            self.task.ai_channels.add_ai_thrmcpl_chan(                                                                        #type:ignore
+            self.task.ai_channels.add_ai_thrmcpl_chan(                                                                        
                                             rf'{self.path}/ai{self.thermocouple_ch_start}:{self.thermocouple_ch_end}',
-                                            thermocouple_type=self.thermocouple_type, units=self.thermal_unit
-                                                    )
+                                            thermocouple_type=self.thermocouple_type,
+                                            units=self.thermal_unit,
+                                            cjc_source=constants.CJCSource.BUILT_IN
+                                            )
         except Exception:
             print(f'Thermocouple {self.name} does not created')
 
