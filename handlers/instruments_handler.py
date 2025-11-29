@@ -159,7 +159,7 @@ class RRGInstrument:
 
     def _get_holding_registers(self):
         try:
-            rr = self.client.read_holding_registers(0, 7, slave=self.unit) 
+            rr = self.client.read_holding_registers(0, 7, self.unit) 
             self.holding_registers = rr.registers  # list of ints
             self.flag_1 = bin(self.holding_registers[2])  # binary string
             self.flag_1 = self.flag_1[::-1]  # reversed binary string
@@ -227,7 +227,7 @@ class RRGInstrument:
             self.flag_1 = map(str, self.flag_1_int)
             self.flag_1 = ''.join(self.flag_1)
             self.flag_1 = int(self.flag_1, 2)
-            self.client.write_register(2, self.flag_1, slave=self.unit) 
+            self.client.write_register(2, self.flag_1, self.unit) 
         except Exception:
             if self.isInitialized:
                 print('(ERROR) RRG: Set state has failed')
@@ -235,7 +235,7 @@ class RRGInstrument:
     def set_flow(self, value: int):
         try:
             value_to_rrg = value * 100
-            self.client.write_register(4, value_to_rrg, slave=self.unit) 
+            self.client.write_register(4, value_to_rrg, self.unit) 
             self._get_holding_registers()
             return self.holding_registers[4]
         except Exception:
