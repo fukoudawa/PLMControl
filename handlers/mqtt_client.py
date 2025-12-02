@@ -49,7 +49,7 @@ class MQTTDevice:
     
     def connect(self, broker: str | None = None, port: int | None = None) -> bool:
         """ 
-            Подключить клиент к MQTT брокеру (без аутентификации)
+            Подключиться к MQTT брокеру (без аутентификации)
             Parameters:
                 broker (str): адресс брокера
                 port (int): порт брокера
@@ -71,7 +71,7 @@ class MQTTDevice:
     
     def disconnect(self) -> bool:
         """ 
-            Отключить клиента от MQTT брокера 
+            Отключиться от MQTT брокера 
         """
         
         if self.__isInited:
@@ -102,10 +102,10 @@ class MQTTDevice:
         return wrapper 
     
 
-class MQTTClient:
+class MQTTProducer:
     def __init__(self, configs: Optional[dict] = None) -> None:
-        self.__client: mqtt_client.Client | None = None
-        self.__id    : str                | None = None
+        self.__client : mqtt_client.Client | None = None
+        self.__id     : str                | None = None
 
         if isinstance(configs, dict): self.connect(configs)
 
@@ -117,8 +117,8 @@ class MQTTClient:
         return self.__client.is_connected() if isinstance(self.__client, mqtt_client.Client) else False
 
     def connect(self, configs: dict) -> bool:
-        """ Подключить клиент к MQTT брокеру (без аутентификации) с
-            параметрами брокера и клиента configs
+        """ Подключиться к MQTT брокеру (без аутентификации) с
+            параметрами брокера и producer'а configs
         """
 
         if self.isOnline: self.disconnect()
@@ -137,7 +137,7 @@ class MQTTClient:
         return self.isOnline
     
     def disconnect(self) -> bool:
-        """ Отключить клиент от MQTT брокера """
+        """ Отключиться от MQTT брокера """
 
         if self.isOnline:
             self.__client.loop_stop()

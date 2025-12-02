@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from os import path
 from concurrent.futures import ThreadPoolExecutor
-from handlers.mqtt_client import MQTTClient
+from handlers.mqtt_client import MQTTProducer
 # global poll
 
 
@@ -83,7 +83,7 @@ class Reader(QtCore.QObject):
         self.read_interval = read_interval
         self.k             = k_value
 
-        self.client       = MQTTClient(mqtt_configs)
+        self.client       = MQTTProducer(mqtt_configs)
 
         self.sample       = sample
         self.discharge    = discharge
