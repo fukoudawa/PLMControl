@@ -137,7 +137,7 @@ class MQTTClient:
         return self.isOnline
     
     def disconnect(self) -> bool:
-        """ Отключить клиента от MQTT брокера """
+        """ Отключить клиент от MQTT брокера """
 
         if self.isOnline:
             self.__client.loop_stop()
@@ -147,9 +147,12 @@ class MQTTClient:
     def publish(self, data: float, topic: str) -> bool:
         """ Опубликовать data в topic """
 
-        try:
-            self.__client.publish(f"{self.__id}/{topic}", f"{data}")
-            return True
-        except Exception as e:
-            print(f"[!] Failed to publish the message with topic '{self.__id}/{topic}': {e}")
+        if self.isOnline:
+            try:
+                self.__client.publish(f"{self.__id}/{topic}", f"{data}")
+                return True
+            except Exception as e:
+                print(f"[!] Failed to publish the message with topic '{self.__id}/{topic}': {e}")
+                return False
+        else:
             return False
