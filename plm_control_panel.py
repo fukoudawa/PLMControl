@@ -155,13 +155,19 @@ class Reader(QtCore.QObject):
 
             # ----------------------- Publish the data --------------------------------
 
-            self.reader_result.emit(instrument_data, thermocouple_data)
+            try:
+                self.reader_result.emit(instrument_data, thermocouple_data)
+            except Exception as e:
+                print(f"Error: {e}")
 
             for topic, value in instrument_data.items():
                 self.client.publish(value, f"instruments/{topic}")
 
             for topic, value in thermocouple_data.items():
                 self.client.publish(value, f"thermocouples/{topic}")
+
+    def __del__(self):
+        self.client.disconnect()
 
 
 class PLMControl(QtWidgets.QMainWindow):
@@ -208,6 +214,7 @@ class PLMControl(QtWidgets.QMainWindow):
         self.reading_thread = QtCore.QThread()
         self.reading_worker.moveToThread(self.reading_thread)
         self.reading_thread.started.connect(self.reading_worker.run)
+        #self.reading_thread.finished.connect(self.reading_worker.__del__)
         self.reading_worker.reader_result.connect(self.get_values)
         self.reading_thread.start()
 
@@ -297,6 +304,9 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_main.ch13_push.clicked.connect(self.display_ch13)
         self.ui_main.ch14_push.clicked.connect(self.display_ch14)
         self.ui_main.ch15_push.clicked.connect(self.display_ch15)
+
+    def __del__(self):
+        self.reading_thread.terminate()
 
     def _init_ui(self):
         self.ui_main = test_ui.Ui_MainWindow()

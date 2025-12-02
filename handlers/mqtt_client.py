@@ -136,13 +136,12 @@ class MQTTProducer:
 
         return self.isOnline
     
-    def disconnect(self) -> bool:
+    def disconnect(self) -> None:
         """ Отключиться от MQTT брокера """
 
         if self.isOnline:
             self.__client.loop_stop()
             self.__client.disconnect()      
-        return not self.isOnline
 
     def publish(self, data: float, topic: str) -> bool:
         """ Опубликовать data в topic """
