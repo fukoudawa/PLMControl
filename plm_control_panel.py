@@ -159,15 +159,25 @@ class PLMControl(QtWidgets.QMainWindow):
 
     def __init__(self):
         QtWidgets.QMainWindow.__init__(self)
-        self._init_ui()
 
+        self._init_ui()
+        self._init_writing_routine()
+        self._init_ch_flags()
+        self._init_instrument_ui()
+
+        # Последующая инициализация всех устройств происходит в
+        # self._init_main(), вызываемой после закрытия начального окна    
+
+    def _init_writing_routine(self) -> None:
         self.currentTime = QtCore.QTime(00, 00, 00)
         self.timeFormat = '0'
         self.experiment_timer = QtCore.QTimer()
         self.experiment_timer.timeout.connect(self.set_experiment_timer)
         self.writing_routine = QtCore.QTimer()
         self.writing_routine.timeout.connect(self.set_writing_routine)
+        self.timestamp_experimental = 0.0
 
+    def _init_ch_flags(self) -> None:
         self.ch0_flag = False
         self.ch1_flag = False
         self.ch2_flag = False
@@ -185,14 +195,10 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ch14_flag = False
         self.ch15_flag = False
 
-        self.timestamp_experimental = 0.0
-        
-
+    def _init_instrument_ui(self) -> None:
         self.ui_start.OK_button.clicked.connect(self.start_main_window)
         self.ui_main.push_record.clicked.connect(self.start_experiment)
         self.ui_main.push_stopRecord.clicked.connect(self.stop_experiment)
-
-        self.ui_main.check_remote_solenoid_2.setDisabled(True)
 
         self.ui_main.check_local_sample.stateChanged.connect(self.sample_local)
         self.ui_main.check_remote_sample.stateChanged.connect(self.sample_remote)
@@ -224,6 +230,7 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_main.set_i_solenoid_slider_1.sliderReleased.connect(self.set_i_solenoid_slider_1)
 
         self.ui_main.check_local_solenoid_2.stateChanged.connect(self.solenoid_2_local)
+        self.ui_main.check_remote_solenoid_2.setDisabled(True)
         self.ui_main.check_remote_solenoid_2.stateChanged.connect(self.solenoid_2_remote)
         self.ui_main.solenoid_start_2.stateChanged.connect(self.solenoid_2_remote_start)
         self.ui_main.solenoid_stop_2.stateChanged.connect(self.solenoid_2_remote_stop)
