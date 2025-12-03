@@ -15,6 +15,8 @@ import numpy as np
 from os import path
 from concurrent.futures import ThreadPoolExecutor
 from handlers.mqtt_client import MQTTProducer
+import time
+from typing import Callable
 # global poll
 
 
@@ -56,6 +58,20 @@ def calc_cathode_temp(voltage, current, k):
     else:
         T_K = 0.0
         return T_K
+
+class ReadSignal(QtCore.QObject):
+    finished = QtCore.pyqtSignal(str, float)
+
+class DeviceReader(QtCore.QRunnable):
+    def __init__(self, measurement: str, operation: Callable) -> None:
+        super().__init__()
+        self.measurement = measurement
+        self.operation   = operation
+        self.signals     = ReadSignal()
+
+    @QtCore.pyqtSlot()
+    def run(self) -> None:
+        self.signals.finished.emit(self.measurement, self.operation())
 
 
 class Reader(QtCore.QObject):
@@ -160,15 +176,15 @@ class Reader(QtCore.QObject):
             except Exception as e:
                 print(f"Error: {e}")
 
+            self.client.connect()
+
             for topic, value in instrument_data.items():
                 self.client.publish(value, f"instruments/{topic}")
 
             for topic, value in thermocouple_data.items():
                 self.client.publish(value, f"thermocouples/{topic}")
 
-    def __del__(self):
-        self.client.disconnect()
-
+            self.client.disconnect()
 
 class PLMControl(QtWidgets.QMainWindow):
 
@@ -214,7 +230,6 @@ class PLMControl(QtWidgets.QMainWindow):
         self.reading_thread = QtCore.QThread()
         self.reading_worker.moveToThread(self.reading_thread)
         self.reading_thread.started.connect(self.reading_worker.run)
-        #self.reading_thread.finished.connect(self.reading_worker.__del__)
         self.reading_worker.reader_result.connect(self.get_values)
         self.reading_thread.start()
 
