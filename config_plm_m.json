@@ -4,12 +4,17 @@
     "Journal_auto_update": "600",
     "k_value": "165.0",
     "Graph_size": "1000",
-    "Path_to_write": "../Test",
+    "Path_to_write": "./Data",
+    "mqtt": {
+        "broker": "127.0.0.1",
+        "port": 1883,
+        "id": "plm_m"
+    },
     "sample_properties": [
         {
             "Voltage_limit": "100",
             "Current_limit": "4",
-            "IP": "192.168.0.201",
+            "IP": "192.168.10.105",
             "connection_type": "SOCKET"
         }
     ],
@@ -18,7 +23,7 @@
             "Voltage_limit": "200",
             "Current_limit": "50",
             "Power_limit": "5000",
-            "IP": "192.168.0.202",
+            "IP": "192.168.10.102",
             "connection_type": "TCPIP"
         }
     ],
@@ -26,21 +31,14 @@
         {
             "Voltage_limit": "8",
             "Current_limit": "250",
-            "IP": "192.168.0.203",
+            "IP": "192.168.10.103",
             "connection_type": "SOCKET"
         },
         {
             "Voltage_limit": "10",
             "Current_limit": "200",
             "Power_limit": "2000",
-            "IP": "192.168.0.206",
-            "connection_type": "TCPIP"
-        },
-        {
-            "Voltage_limit": "10",
-            "Current_limit": "200",
-            "Power_limit": "2000",
-            "IP": "192.168.0.207",
+            "IP": "192.168.10.104",
             "connection_type": "TCPIP"
         }
     ],
@@ -49,13 +47,13 @@
             "Voltage_limit": "60",
             "Current_limit": "80",
             "Power_limit": "3000",
-            "IP": "192.168.0.204",
+            "IP": "192.168.10.111",
             "connection_type": "TCPIP"
         }
     ],
     "RRG_connection": [
         {
-            "COM_port": "COM3",
+            "COM_port": "COM7",
             "Baudrate": "19200",
             "Address": "2"
         }
@@ -71,21 +69,21 @@
     ],
     "Pressure1": [
         {
-		"ip": "192.168.0.32",
+		"ip": "192.168.10.106",
     		"port": "501",
     		"address": "1"
         }
     ],
     "Pressure2": [
         {
-		"ip": "192.168.0.32",
+		"ip": "192.168.10.106",
     		"port": "502",
     		"address": "2"
         }
     ],
     "Pressure3": [
         {
-		    "ip": "192.168.0.32",
+		    "ip": "192.168.10.106",
     		"port": "503",
     		"address": "3"
         }
