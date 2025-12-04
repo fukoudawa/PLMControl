@@ -13,7 +13,7 @@ class SCPIInstrument:
         
         self.name = name  # название прибора
         self.isInitialized = bool()  # флаг инициализации
-        self.sleep_time = sleep_time  # интервал между командами
+        # self.sleep_time = sleep_time  # интервал между командами
         try:
             if connection_type == 'TCPIP':  # Первый способ установки соединения с прибором
                 self.instrument = rm.open_resource(f'TCPIP::{ip}::inst0::INSTR')
@@ -21,8 +21,7 @@ class SCPIInstrument:
                 self.instrument = rm.open_resource(f'TCPIP::{ip}::{port}::SOCKET')
                 self.instrument.write_termination = '\n'
                 self.instrument.read_termination = '\n'
-            #print(f'{self.name}')
-            #print(self.get_identification())
+            self.instrument.query_delay = sleep_time # задержка для команд
             print(f'(+) {self.name} initialized: {self.get_identification()}')
             self.isInitialized = True
 
@@ -30,14 +29,25 @@ class SCPIInstrument:
             self.instrument = None
             print(f'(!) {self.name} failed to initialize:\t{e}')
             self.IsInitialized = False
+    
+    def _query(self, command: str):
+        """
+        Обёртка над вызовом SCPI комманд
+        """
+        try:
+            self.instrument.lock()
+            response = self.instrument.query(command)
+            self.instrument.unlock()
+            return response
+        except Exception as e:
+            raise ValueError(e) # временное error propagation
 
     def set_voltage(self, value: float):
         """
         Отправляет в прибор команду на установление напряжения, переданного в метод
         """
         try:
-            self.instrument.write(f'VOLTAGE {value}') #type:ignore
-            time.sleep(self.sleep_time)
+            self._query(f'VOLTAGE {value}')
         except Exception:
             pass
 
@@ -46,8 +56,7 @@ class SCPIInstrument:
         Отправляет в прибор команду на установление тока, переданного в метод
         """
         try:
-            self.instrument.write(f'CURRENT {value}')#type:ignore
-            time.sleep(self.sleep_time)
+            self._query(f'CURRENT {value}')
         except Exception:
             pass
 
@@ -56,8 +65,7 @@ class SCPIInstrument:
         Отправляет в прибор команду на установление мощности, переданного в метод
         """
         try:
-            self.instrument.write(f'POWER {value}')#type:ignore
-            time.sleep(self.sleep_time)
+            self._query(f'POWER {value}')
         except Exception:
             pass
 
@@ -66,7 +74,7 @@ class SCPIInstrument:
         Возвращает текущее напряжение на источнике питания
         """
         try:
-            return round(float(self.instrument.query('MEASURE:VOLTAGE?').strip('\x00')), 2)#type:ignore
+            return round(float(self._query('MEASURE:VOLTAGE?').strip('\x00')), 2)
         except:
             return 0.0
 
@@ -75,7 +83,7 @@ class SCPIInstrument:
         Возвращает текущий ток на источнике питания
         """
         try:
-            return round(float(self.instrument.query('MEASURE:CURRENT?').strip('\x00')), 2)#type:ignore
+            return round(float(self._query('MEASURE:CURRENT?').strip('\x00')), 2)
         except:
             return 0.0
 
@@ -84,7 +92,7 @@ class SCPIInstrument:
         Возвращает текущую мощность на источнике питания
         """
         try:
-            return round(float(self.instrument.query('MEASURE:POWER?').strip('\x00')), 2)#type:ignore
+            return round(float(self._query('MEASURE:POWER?').strip('\x00')), 2)
         except:
             return 0.0
 
@@ -93,7 +101,7 @@ class SCPIInstrument:
         Возвращает идентификацию прибора
         """
         try:   
-            return self.instrument.query('*IDN?')#type:ignore
+            return self._query('*IDN?')
         except:
             return 0.0
 
@@ -102,9 +110,7 @@ class SCPIInstrument:
         Включает выход источника питания, передаёт состояние выхода прибора (0-выход отключен, 1-выход включен)
         """
         try:
-            self.instrument.write('OUTPUT ON')#type:ignore
-            time.sleep(self.sleep_time)
-            return self.instrument.query('OUTPUT?')#type:ignore
+            self._query('OUTPUT ON')
         except Exception:
             print(f'{self.name}: Cannot set output to on')
 
@@ -113,9 +119,7 @@ class SCPIInstrument:
         Выключает выход источника питания, передаёт состояние выхода прибора (0-выход отключен, 1-выход включен)
         """
         try:
-            self.instrument.write('OUTPUT OFF')#type:ignore
-            time.sleep(self.sleep_time)
-            return self.instrument.query('OUTPUT?')#type:ignore
+            self._query('OUTPUT OFF')
         except Exception:
             print(f'{self.name}: Cannot set output to off')
 
@@ -124,9 +128,7 @@ class SCPIInstrument:
         Устанавливает прибор в состояние, при котором управление осуществляется с лицевой панели прибора
         """
         try:
-            self.instrument.write('SYSTEM:LOCAL')#type:ignore
-            time.sleep(self.sleep_time)
-            return f'{self.name}: SYSTEM:LOCAL'
+            self._query('SYSTEM:LOCAL')
         except Exception:
             print(f'{self.name}: Cannot set device to local mode')
 
@@ -136,33 +138,9 @@ class SCPIInstrument:
         воспринимать команды со сторонних программ
         """
         try:
-            self.instrument.write('SYSTEM:REMOTE')#type:ignore
-            time.sleep(self.sleep_time)
-            return f'{self.name}: SYSTEM:REMOTE'
+            self._query('SYSTEM:REMOTE')
         except Exception:
             print(f'{self.name}: Cannot set device to remote mode')
-
-
-class PyrometerInstrument:
-    """
-    Класс, объединяющий методы для работы с пирометром через COM-порт
-    """
-    def __init__(self, port, baudrate):
-        self.isInitialized = bool()
-        try:
-            self.ser = serial.Serial(port=port, baudrate=baudrate)
-            self.ser.open()
-            print('(+) Pyrometer initialized')
-            self.isInitialized = True
-
-        except Exception:
-            self.ser = object
-            print('(!) Failed to initialize pyrometer')
-            self.isInitialized = False
-
-    def return_value_pyrometer(self):
-        value = self.ser.readline().decode('ascii') #type:ignore  # получаем от пирометра абракадабру и декодируем её в строку
-        return value[9:len(value)-3]                 # достаём из строки значение температуры на пирометре
 
 
 class RRGInstrument:
@@ -183,7 +161,7 @@ class RRGInstrument:
 
     def _get_holding_registers(self):
         try:
-            rr = self.client.read_holding_registers(0, 7, slave=self.unit) #type:ignore
+            rr = self.client.read_holding_registers(0, 7, self.unit) 
             self.holding_registers = rr.registers  # list of ints
             self.flag_1 = bin(self.holding_registers[2])  # binary string
             self.flag_1 = self.flag_1[::-1]  # reversed binary string
@@ -238,9 +216,6 @@ class RRGInstrument:
         # 0 - открыт, 1 - закрыт, 2 - регулировка
         try:
             self._get_holding_registers()
-            # if state == 'RRG open 1':
-            #     self.flag_1_int[2] = 1
-            #     self.flag_1_int[3] = 1
             if state == 0:
                 self.flag_1_int[2] = 1
                 self.flag_1_int[3] = 0
@@ -254,7 +229,7 @@ class RRGInstrument:
             self.flag_1 = map(str, self.flag_1_int)
             self.flag_1 = ''.join(self.flag_1)
             self.flag_1 = int(self.flag_1, 2)
-            self.client.write_register(2, self.flag_1, slave=self.unit) #type:ignore
+            self.client.write_register(2, self.flag_1, self.unit) 
         except Exception:
             if self.isInitialized:
                 print('(ERROR) RRG: Set state has failed')
@@ -262,7 +237,7 @@ class RRGInstrument:
     def set_flow(self, value: int):
         try:
             value_to_rrg = value * 100
-            self.client.write_register(4, value_to_rrg, slave=self.unit) #type:ignore
+            self.client.write_register(4, value_to_rrg, self.unit) 
             self._get_holding_registers()
             return self.holding_registers[4]
         except Exception:
@@ -308,16 +283,9 @@ class NIDAQInstrument:
         if thermal_unit == 'C':
             self.thermal_unit = constants.TemperatureUnits.DEG_C
         if thermal_unit == 'K':
-            self.thermal_unit = constants.TemperatureUnits.DEG_K #type:ignore
+            self.thermal_unit = constants.TemperatureUnits.K 
         try:
             self.task = Task()
-            # try:
-            #     if high_speed_adc:
-            #         self.task.timing.adc_sample_high_speed()
-            #     else:
-            #         pass
-            # except Exception:
-            #     print('Cannot set ADC on thermocouple to high speed mode')
             self.isInitialized = True
             print("(+) Thermocouple initialized")
         except Exception:
@@ -327,40 +295,38 @@ class NIDAQInstrument:
 
     def create_single_thermocouple(self):
         try:
-            self.task.ai_channels.add_ai_thrmcpl_chan(rf'{self.path}/ai{self.thermocouple_ch_start}', #type:ignore
-                                                      thermocouple_type=self.thermocouple_type,
-                                                      units=self.thermal_unit
-                                                      )
+            self.task.ai_channels.add_ai_thrmcpl_chan(
+                                                rf'{self.path}/ai{self.thermocouple_ch_start}', 
+                                                thermocouple_type=self.thermocouple_type,
+                                                units=self.thermal_unit,
+                                                cjc_source=constants.CJCSource.BUILT_IN
+                                                )
         except Exception:
             print(f'Thermocouple {self.name} does not created')
 
     def create_multiple_thermocouples(self):
         try:
-            self.task.ai_channels.add_ai_thrmcpl_chan(                                                                        #type:ignore
+            self.task.ai_channels.add_ai_thrmcpl_chan(                                                                        
                                             rf'{self.path}/ai{self.thermocouple_ch_start}:{self.thermocouple_ch_end}',
-                                            thermocouple_type=self.thermocouple_type, units=self.thermal_unit
-                                                    )
+                                            thermocouple_type=self.thermocouple_type,
+                                            units=self.thermal_unit,
+                                            cjc_source=constants.CJCSource.BUILT_IN
+                                            )
         except Exception:
             print(f'Thermocouple {self.name} does not created')
 
     def read_thermocouple(self):
-        # try:
-            value = self.task.read() #type:ignore
-            # time.sleep(self.sleep_time)
-            return value
-        # except Exception:
-        #     print('Cannot read value from thermocouple')
-        #     return None
+        value = self.task.read() 
+        return value
 
     def stop_task(self):
-        self.task.close() #type:ignore
+        self.task.close() 
 
 class VacuumeterERSTEVAK:
     def __init__(self, ip, port, address):
         self.ip = ip
         self.port = port
         self.address = address
-
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((self.ip, self.port))
@@ -372,7 +338,6 @@ class VacuumeterERSTEVAK:
         
     def return_value(self):
         data = float()
-
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.settimeout(2)
@@ -399,62 +364,3 @@ class VacuumeterERSTEVAK:
         command += self.ERSTVAK_CRC64(command)
         command += bytes('\r', 'ascii')
         return command
-
-
-class VacuumeterADC:
-    """
-     Класс, объединяющий методы для работы с вакуумметрами через COM-порт
-     TODO: hardcoded af, переделать?
-    """
-
-    def __init__(self, port, baudrate):
-        self.isInitialized = bool()
-
-        try:
-            self.device = serial.Serial(port=port, baudrate=baudrate)
-            self.isInitialized = True
-            print("(+) Vacuumeter reader initialized")
-
-        except serial.SerialException as se:
-            self.device = serial.Serial()
-            self.isInitialized = False
-            print("(!) Failed to initialize Vacuumeter reader:\t", se)
-
-    def __del__(self):
-        if self.device != None:
-            self.device.close()
-
-    def return_value(self):
-        data = { "Пушка": 0, "Ресивер": 0, "Форвакуумная линия": 0}
-
-        if self.isInitialized:
-            adc_ch = str(self.device.readline()).split(',')
-            adc_voltage = lambda adc, r1, r2, udd: adc * (r2/r1) * (udd/2**16)
-            pressure_ersvak = lambda u: (10**(u-5.5)) * 1.333 # torr
-            pressure_instrue = lambda u: 10**(1.222*u-7.647)  # torr
-
-            data["Пушка"] = pressure_ersvak(adc_voltage(adc_ch[0], 1000, 4500, 5.0))
-            data["Ресивер"] = pressure_instrue(adc_voltage(adc_ch[1], 1000, 4500, 5.0))
-            data["Форвакуумная линия"] = pressure_ersvak(adc_voltage(adc_ch[2], 1000, 4500, 5.0))
-
-        return data
-
-
-
-class ElimInstrument:
-    # Заглушка под управление источниками питания ЭЛИМ
-    pass
-
-if __name__ == "__main__":
-    VacuumeterERSTEVAK(
-        ip = '192.168.0.32',
-        port = 501,
-        address = 3
-    )
-
-
-
-
-
-
-
