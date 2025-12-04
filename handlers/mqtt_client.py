@@ -1,29 +1,43 @@
 from typing import Callable, Optional
+from numpy import isin
 from paho.mqtt import client as mqtt_client
 
 class MQTTDevice:
     def __init__(self, configs: dict | None = None) -> None:
-        self.__broker   : str | None = None                # адресс брокера
-        self.__port     : int | None = None                # порт брокера
-        self.__id       : str | None = None                # ID клиента
-        self.__client   : mqtt_client.Client | None = None # экземпялр клиента
-        self.root_topic : str  = ""                        # корневая тема, публикуемая клиентом
-        self.__isInited : bool = False                     # флаг инициализации  
+        self.__broker   : str | None = None                  # адресс брокера
+        self.__port     : int | None = None                  # порт брокера
+        self.__id       : str | None = None                  # ID клиента
+        self.__client   : mqtt_client.Client | None = None   # экземпялр клиента
+        self.root_topic : str  = ""                          # корневая тема, публикуемая клиентом
+        self.__isInited : bool = False                       # флаг инициализации  
            
         if isinstance(configs, dict): self.configure(configs)
-        
-    def __del__(self) -> None:
-        self.disconnect()   
-    
+
     @property
     def isOnline(self) -> bool: 
         return self.__client.is_connected() if self.__isInited else False
-    
+
+    @property
+    def id(self) -> str: 
+        return self.__id
+
+    @property
+    def broker(self) -> str: 
+        return self.__broker
+
+    @property
+    def port(self) -> int: 
+        return self.__port
+
     def configure(self, configs: dict) -> bool:
         """ 
-            Сконфигурировать MQTT клиент
-            Parameters:
-                configs (dict): параметры конфигурации
+        Сконфигурировать MQTT клиент
+            
+        Parameters:
+            configs (dict): параметры конфигурации
+            
+        Returns:
+            bool: True, если клиент успешно сконфигурирован
         """
 
         # Конфигурирование критических параметров (необходимых для работы клиента)
@@ -49,17 +63,23 @@ class MQTTDevice:
     
     def connect(self, broker: str | None = None, port: int | None = None) -> bool:
         """ 
-            Подключиться к MQTT брокеру (без аутентификации)
-            Parameters:
-                broker (str): адресс брокера
-                port (int): порт брокера
+        Подключиться к MQTT брокеру (без аутентификации)
+
+        Parameters:
+            broker (str): адресс брокера
+            port (int): порт брокера
+
+        Returns:
+            bool: True, если клиент успешно подключен к брокеру
         """
         
         if not self.__isInited:
             print("[!] Failed to connect to the MQTT Broker: device is not configurated")
         else:
-            if isinstance(broker, str) : self.__broker = broker
+            # Если переданы новые значения для брокера и порта, обновляем их
+            if isinstance(broker, str) : self.__broker = broker 
             if isinstance(port, int)   : self.__port   = port
+
             try:
                 # Подключение и поддержка связи в отдельном потоке
                 self.__client.connect(self.__broker, self.__port)
@@ -71,23 +91,33 @@ class MQTTDevice:
     
     def disconnect(self) -> bool:
         """ 
-            Отключиться от MQTT брокера 
+        Отключиться от MQTT брокера 
+
+        Returns:
+            bool: True, если клмент успешно отключен
         """
         
         if self.__isInited:
             self.__client.loop_stop()
             self.__client.disconnect()      
+
         return not self.isOnline
             
-    ''' ---------------------------- @Decorators ---------------------------- '''
+    ''' ---------------------------------------- @Decorators ---------------------------------------- '''
     
     def topic(title: str) -> Callable:
         """ 
-            Декоратор, публикующий значение, возвращаемое функцией,
-            в топик, название которого имеет вид '{root_topic}/{title}'
+        Декоратор, публикующий значение, возвращаемое функцией, в топик, 
+        название которого имеет вид '{root_topic}/{title}'
+
+        Parameters:
+            title (str): название топика
+
+        Returns:
+            Callable: декоратор, публикующий значение, возвращаемое функцией, в топик
         """
         
-        def wrapper(func: Callable) -> Callable:
+        def wrapper(func: Callable[[], float]) -> Callable[..., float]:
             def publish(self, *args, **kwargs) -> float: 
                 measure = func(self)
                 
@@ -100,29 +130,42 @@ class MQTTDevice:
                 return measure
             return publish
         return wrapper 
+
+    ''' -------------------------------------- Dunder Methods -------------------------------------- '''
+
+    def __del__(self) -> None:
+        self.disconnect()  
+
+    def __repr__(self) -> str:
+        return f"MQTTDevice(id={self.__id}, broker={self.__broker}, port={self.__port})"
+
+    def __eq__(self, obj: object) -> bool:
+        return self.__id == obj.id if isinstance(obj, MQTTDevice) else False
     
 
 class MQTTProducer:
     def __init__(self, configs: Optional[dict] = None) -> None:
-        self.__broker   : Optional[str]                = None
-        self.__port     : Optional[int]                = None
-        self.__id       : Optional[str]                = None
-        self.__client   : Optional[mqtt_client.Client] = None
-        self.__isInited : bool                         = False
+        self.__broker   : str | None = None                  # адресс брокера
+        self.__port     : int | None = None                  # порт брокера
+        self.__id       : str | None = None                  # ID клиента
+        self.__client   : mqtt_client.Client | None = None   # экземпялр клиента
+        self.__isInited : bool = False                       # флаг инициализации  
 
         if isinstance(configs, dict): self.configure(configs)
-
-    def __del__(self) -> None:
-        self.disconnect()
 
     @property
     def isOnline(self) -> bool: 
         return self.__client.is_connected() if isinstance(self.__client, mqtt_client.Client) else False
 
     def configure(self, configs: dict) -> bool:
-        """ Сконфигурировать MQTT producer'а
-            Parameters:
-                configs (dict): параметры конфигурации
+        """
+        Настротить объект MQTTProducer
+
+        Parameters:
+            configs (dict): параметры подключения
+
+        Returns:
+            bool: True, если конфигурация прошла успешно
         """
 
         try:
@@ -142,8 +185,11 @@ class MQTTProducer:
         return self.__isInited
 
     def connect(self) -> bool:
-        """ Подключиться к MQTT брокеру (без аутентификации) с
-            параметрами брокера и producer'а configs
+        """ 
+        Подключиться к MQTT брокеру (без аутентификации)
+
+        Returns:
+            bool: True, если клиент успешно подключен к брокеру
         """
 
         if self.__isInited:
@@ -151,7 +197,6 @@ class MQTTProducer:
             try:
                 self.__client.connect(self.__broker, self.__port)
                 self.__client.loop_start()
-                # print("[+] Publisher was successfully connected to the MQTT broker")
             except Exception as e:
                 print(f"[!] Failed to connect to the MQTT Broker: {e}")
         else:
@@ -160,19 +205,34 @@ class MQTTProducer:
         return self.isOnline
     
     def disconnect(self) -> bool:
-        """ Отключиться от MQTT брокера """
+        """
+        Отключиться от MQTT брокера
+
+        Returns:
+            bool: True, если успешно отключено (или уже отключено)
+        """
 
         if self.isOnline:
-            self.__client.loop_stop()
-            self.__client.disconnect()  
+            self.__client.loop_stop()  # Останавливаем внутренний цикл выборки сообщений
+            self.__client.disconnect() # Отключаемся от брокера
 
         return not self.isOnline    
 
     def publish(self, data: float, topic: str) -> bool:
-        """ Опубликовать data в topic """
+        """
+        Опубликовать данные в указанный топик
+
+        Parameters:
+            data (float): Данные для публикации
+            topic (str): Топик в который публикуется сообщение
+
+        Returns:
+            bool: True если публикация прошла успешно
+        """
 
         if self.isOnline:
             try:
+                # Формируем полный топик и публикуем данные
                 self.__client.publish(f"{self.__id}/{topic}", f"{data}")
                 return True
             except Exception as e:
@@ -180,3 +240,14 @@ class MQTTProducer:
                 return False
         else:
             return False
+
+    ''' -------------------------------------- Dunder Methods -------------------------------------- '''
+
+    def __del__(self) -> None:
+        self.disconnect()  
+
+    def __repr__(self) -> str:
+        return f"MQTTProducer(id={self.__id}, broker={self.__broker}, port={self.__port})"
+
+    def __eq__(self, obj: object) -> bool:
+        return self.__id == obj.id if isinstance(obj, MQTTProducer) else False
