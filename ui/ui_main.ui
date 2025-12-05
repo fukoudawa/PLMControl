@@ -28,13 +28,13 @@
          <string notr="true">background-color: rgb(255, 255, 255);</string>
         </property>
         <property name="frameShape">
-         <enum>QFrame::Shape::Box</enum>
+         <enum>QFrame::NoFrame</enum>
         </property>
         <property name="text">
          <string>00:00:00</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignCenter</set>
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -82,13 +82,13 @@
            <string notr="true">background-color: rgb(255, 255, 255);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <property name="text">
            <string>Образец KEPCO</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -97,9 +97,6 @@
         </item>
         <item>
          <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
-          </property>
           <property name="sizeHint" stdset="0">
            <size>
             <width>17</width>
@@ -121,13 +118,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>U, В</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -142,7 +139,7 @@
              </font>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
             <property name="decimals">
              <number>2</number>
@@ -170,7 +167,7 @@
              <number>100</number>
             </property>
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -185,13 +182,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>P, Вт</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -206,13 +203,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>I, A</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -228,7 +225,7 @@
              <number>100</number>
             </property>
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -238,7 +235,7 @@
              <bool>false</bool>
             </property>
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -253,7 +250,7 @@
              </font>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
             <property name="maximum">
              <double>9999.989999999999782</double>
@@ -274,7 +271,7 @@
              </font>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
             <property name="minimum">
              <double>-4.000000000000000</double>
@@ -298,13 +295,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -319,13 +316,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -340,13 +337,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -430,13 +427,13 @@
            <string notr="true">background-color: rgb(255, 255, 255);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <property name="text">
            <string>Разряд</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -445,9 +442,6 @@
         </item>
         <item>
          <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
-          </property>
           <property name="sizeHint" stdset="0">
            <size>
             <width>19</width>
@@ -469,7 +463,7 @@
              </font>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
             <property name="maximum">
              <double>30000.000000000000000</double>
@@ -490,7 +484,7 @@
              </font>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
             <property name="minimum">
              <double>0.000000000000000</double>
@@ -514,13 +508,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>U, В</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -536,7 +530,7 @@
              <number>100</number>
             </property>
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -551,13 +545,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -572,13 +566,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -593,7 +587,7 @@
              </font>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
             <property name="decimals">
              <number>2</number>
@@ -620,13 +614,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>P, Вт</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -641,13 +635,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -660,7 +654,7 @@
              <number>60</number>
             </property>
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -676,7 +670,7 @@
              <number>500</number>
             </property>
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -691,13 +685,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>I, A</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -786,13 +780,13 @@
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>Соленоид 1</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -814,9 +808,6 @@
                 <pointsize>12</pointsize>
                </font>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
-              </property>
               <property name="maximum">
                <double>9999.989999999999782</double>
               </property>
@@ -835,9 +826,6 @@
                 <pointsize>12</pointsize>
                </font>
               </property>
-              <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
-              </property>
               <property name="minimum">
                <double>0.000000000000000</double>
               </property>
@@ -855,7 +843,7 @@
                <bool>false</bool>
               </property>
               <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -870,13 +858,13 @@
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>U, В</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -889,7 +877,7 @@
                <number>360</number>
               </property>
               <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -905,7 +893,7 @@
                <number>8</number>
               </property>
               <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -920,13 +908,13 @@
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>I, A</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -941,13 +929,13 @@
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>P, Вт</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -960,9 +948,6 @@
                <font>
                 <pointsize>12</pointsize>
                </font>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
               </property>
               <property name="decimals">
                <number>2</number>
@@ -989,13 +974,13 @@
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -1010,13 +995,13 @@
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -1031,13 +1016,13 @@
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -1146,13 +1131,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>Соленоид 2</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -1175,7 +1160,7 @@ QButton::indicator {
                </font>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
               <property name="maximum">
                <double>9999.989999999999782</double>
@@ -1196,7 +1181,7 @@ QButton::indicator {
                </font>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
               <property name="minimum">
                <double>0.000000000000000</double>
@@ -1215,7 +1200,7 @@ QButton::indicator {
                <bool>false</bool>
               </property>
               <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -1230,13 +1215,13 @@ QButton::indicator {
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>U, В</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -1249,7 +1234,7 @@ QButton::indicator {
                <number>360</number>
               </property>
               <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -1265,7 +1250,7 @@ QButton::indicator {
                <number>8</number>
               </property>
               <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -1280,13 +1265,13 @@ QButton::indicator {
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>I, A</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -1301,13 +1286,13 @@ QButton::indicator {
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>P, Вт</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -1322,7 +1307,7 @@ QButton::indicator {
                </font>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
               <property name="decimals">
                <number>2</number>
@@ -1349,13 +1334,13 @@ QButton::indicator {
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -1370,13 +1355,13 @@ QButton::indicator {
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -1391,13 +1376,13 @@ QButton::indicator {
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -1508,13 +1493,13 @@ QButton::indicator {
            <string notr="true">background-color: rgb(255, 255, 255);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <property name="text">
            <string>Катод</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -1537,7 +1522,7 @@ QButton::indicator {
              </font>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
             <property name="minimum">
              <double>0.000000000000000</double>
@@ -1561,13 +1546,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>U, В</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -1583,7 +1568,7 @@ QButton::indicator {
              <number>10</number>
             </property>
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -1598,7 +1583,7 @@ QButton::indicator {
              </font>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
             <property name="maximum">
              <double>12000.000000000000000</double>
@@ -1619,13 +1604,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>P, Вт</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -1640,13 +1625,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>I, A</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -1659,7 +1644,7 @@ QButton::indicator {
              <number>200</number>
             </property>
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -1675,7 +1660,7 @@ QButton::indicator {
              <number>60</number>
             </property>
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -1690,13 +1675,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -1711,7 +1696,7 @@ QButton::indicator {
              </font>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
             <property name="decimals">
              <number>2</number>
@@ -1738,13 +1723,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -1759,13 +1744,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -1780,13 +1765,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>T, K</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -1801,7 +1786,7 @@ QButton::indicator {
              </font>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
             <property name="maximum">
              <double>12000.000000000000000</double>
@@ -1823,7 +1808,7 @@ QButton::indicator {
              <number>10</number>
             </property>
             <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -1838,13 +1823,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -1946,13 +1931,13 @@ QButton::indicator {
            <string notr="true">background-color: rgb(255, 255, 255);</string>
           </property>
           <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <property name="text">
            <string>РРГ и заслонка</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -1977,13 +1962,13 @@ QButton::indicator {
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>G, %</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -1998,7 +1983,7 @@ QButton::indicator {
                </font>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -2011,10 +1996,10 @@ QButton::indicator {
                <number>0</number>
               </property>
               <property name="maximum">
-               <number>100</number>
+               <number>300</number>
               </property>
               <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
              </widget>
             </item>
@@ -2029,13 +2014,13 @@ QButton::indicator {
                <string notr="true">background-color: rgb(255, 255, 255);</string>
               </property>
               <property name="frameShape">
-               <enum>QFrame::Shape::Box</enum>
+               <enum>QFrame::NoFrame</enum>
               </property>
               <property name="text">
                <string>0</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignmentFlag::AlignCenter</set>
+               <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
@@ -2066,10 +2051,31 @@ QButton::indicator {
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="gas"/>
+           <widget class="QComboBox" name="set_gas">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <item>
+             <property name="text">
+              <string>Воздух</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Гелий</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Аргон</string>
+             </property>
+            </item>
+           </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5" stretch=""/>
+           <layout class="QHBoxLayout" name="horizontalLayout_5"/>
           </item>
          </layout>
         </item>
@@ -2089,21 +2095,18 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>P пушка</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
             <property name="sizeHint" stdset="0">
              <size>
               <width>40</width>
@@ -2123,13 +2126,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -2151,21 +2154,18 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>P ТМН</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
             <property name="sizeHint" stdset="0">
              <size>
               <width>40</width>
@@ -2185,13 +2185,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -2213,21 +2213,18 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>P форвак</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
           <item>
            <spacer name="horizontalSpacer_4">
-            <property name="orientation">
-             <enum>Qt::Orientation::Horizontal</enum>
-            </property>
             <property name="sizeHint" stdset="0">
              <size>
               <width>40</width>
@@ -2247,13 +2244,13 @@ QButton::indicator {
              <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="frameShape">
-             <enum>QFrame::Shape::Box</enum>
+             <enum>QFrame::NoFrame</enum>
             </property>
             <property name="text">
              <string>0</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignmentFlag::AlignCenter</set>
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -2261,9 +2258,6 @@ QButton::indicator {
         </item>
         <item>
          <spacer name="verticalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
-          </property>
           <property name="sizeHint" stdset="0">
            <size>
             <width>20</width>
@@ -2274,9 +2268,6 @@ QButton::indicator {
         </item>
         <item>
          <spacer name="verticalSpacer_5">
-          <property name="orientation">
-           <enum>Qt::Orientation::Vertical</enum>
-          </property>
           <property name="sizeHint" stdset="0">
            <size>
             <width>20</width>
@@ -2300,607 +2291,57 @@ QButton::indicator {
        <string notr="true">background-color: rgb(255, 255, 255);</string>
       </property>
       <property name="frameShape">
-       <enum>QFrame::Shape::Box</enum>
+       <enum>QFrame::NoFrame</enum>
       </property>
       <property name="text">
        <string>Термопары</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </item>
     <item>
-     <layout class="QGridLayout" name="gridLayout_8" columnstretch="1,4,4">
-      <property name="horizontalSpacing">
-       <number>5</number>
-      </property>
-      <property name="verticalSpacing">
-       <number>0</number>
-      </property>
+     <layout class="QGridLayout" name="gridLayout_8" columnstretch="1,5">
       <item row="0" column="1">
-       <widget class="PlotWidget" name="thermocouples_graph" native="true"/>
+       <widget class="GraphicsLayoutWidget" name="thermocouples_graph" native="true"/>
       </item>
       <item row="0" column="0">
-       <layout class="QGridLayout" name="gridLayout_7">
-        <property name="verticalSpacing">
-         <number>4</number>
-        </property>
-        <item row="8" column="1">
-         <widget class="QLabel" name="ch8">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="1">
-         <widget class="QLabel" name="ch10">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLabel" name="ch2">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="1">
-         <widget class="QLabel" name="ch6">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QLabel" name="ch4">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="14" column="1">
-         <widget class="QLabel" name="ch14">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="15" column="1">
-         <widget class="QLabel" name="ch15">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="13" column="1">
-         <widget class="QLabel" name="ch13">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="ch0">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="1">
-         <widget class="QLabel" name="ch7">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <widget class="QLabel" name="ch5">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="1">
-         <widget class="QLabel" name="ch9">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLabel" name="ch1">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="1">
-         <widget class="QLabel" name="ch12">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="1">
-         <widget class="QLabel" name="ch11">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLabel" name="ch3">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: rgb(255, 255, 255);</string>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::Shape::Box</enum>
-          </property>
-          <property name="text">
-           <string>0</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="0">
-         <widget class="QPushButton" name="ch12_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH12</string>
-          </property>
-         </widget>
-        </item>
-        <item row="13" column="0">
-         <widget class="QPushButton" name="ch13_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH13</string>
-          </property>
-         </widget>
-        </item>
-        <item row="14" column="0">
-         <widget class="QPushButton" name="ch14_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH14</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="ch1_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH1</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0">
-         <widget class="QPushButton" name="ch5_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH5</string>
-          </property>
-         </widget>
-        </item>
-        <item row="6" column="0">
-         <widget class="QPushButton" name="ch6_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH6</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QPushButton" name="ch2_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH2</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QPushButton" name="ch4_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH4</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QPushButton" name="ch3_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH3</string>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="0">
-         <widget class="QPushButton" name="ch8_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH8</string>
-          </property>
-         </widget>
-        </item>
-        <item row="9" column="0">
-         <widget class="QPushButton" name="ch9_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH9</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0">
-         <widget class="QPushButton" name="ch7_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH7</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0">
-         <widget class="QPushButton" name="ch10_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH10</string>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="0">
-         <widget class="QPushButton" name="ch11_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH11</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="ch0_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH0</string>
-          </property>
-         </widget>
-        </item>
-        <item row="15" column="0">
-         <widget class="QPushButton" name="ch15_push">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>CH15</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="0" column="2">
-       <widget class="PlotWidget" name="thermocouples_graph_full" native="true"/>
+       <widget class="QTableWidget" name="thermocoples_table">
+        <attribute name="horizontalHeaderStretchLastSection">
+         <bool>true</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Канал</string>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="textAlignment">
+          <set>AlignCenter</set>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Значение</string>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="textAlignment">
+          <set>AlignCenter</set>
+         </property>
+        </column>
+       </widget>
       </item>
      </layout>
     </item>
    </layout>
-  </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1920</width>
-     <height>33</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menu">
-    <property name="title">
-     <string>Меню</string>
-    </property>
-    <addaction name="journal"/>
-    <addaction name="settings"/>
-   </widget>
-   <widget class="QMenu" name="mass_spectrometer">
-    <property name="title">
-     <string>Масс-спектрометр</string>
-    </property>
-    <addaction name="action"/>
-   </widget>
-   <widget class="QMenu" name="probe">
-    <property name="title">
-     <string>Зондовая диагностика</string>
-    </property>
-    <addaction name="action_2"/>
-   </widget>
-   <widget class="QMenu" name="data_analysis">
-    <property name="title">
-     <string>PLM Data Analysis Tool</string>
-    </property>
-    <addaction name="action_PLM_DAT"/>
-   </widget>
-   <addaction name="menu"/>
-   <addaction name="mass_spectrometer"/>
-   <addaction name="probe"/>
-   <addaction name="data_analysis"/>
   </widget>
   <action name="journal">
    <property name="text">
@@ -2929,12 +2370,6 @@ QButton::indicator {
   </action>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>PlotWidget</class>
-   <extends>QWidget</extends>
-   <header>pyqtgraph</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>QDoubleSlider</class>
    <extends>QSlider</extends>

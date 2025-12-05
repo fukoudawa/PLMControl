@@ -180,7 +180,7 @@ class Reader(QtCore.QObject):
             if datetime.now() < deadline:
                 pass
             else:
-                print(f"Reader: deadline exceeded by {(datetime.now() - deadline).microseconds * 1e3} ms")
+                print(f"Reader: deadline exceeded by {(datetime.now() - deadline).microseconds * 1e-3} ms")
 
 class PLMControl(QtWidgets.QMainWindow):
 
@@ -191,7 +191,6 @@ class PLMControl(QtWidgets.QMainWindow):
         
         self._init_ui()
         self._init_writing_routine()
-        self._init_ch_flags()
         self._init_instrument_ui()
 
         # Последующая инициализация всех устройств происходит в
@@ -202,24 +201,6 @@ class PLMControl(QtWidgets.QMainWindow):
         self.timeFormat = '0'
         self.experiment_timer = QtCore.QTimer()
         self.experiment_timer.timeout.connect(self.set_experiment_timer)
-
-    def _init_ch_flags(self) -> None:
-        self.ch0_flag = False
-        self.ch1_flag = False
-        self.ch2_flag = False
-        self.ch3_flag = False
-        self.ch4_flag = False
-        self.ch5_flag = False
-        self.ch6_flag = False
-        self.ch7_flag = False
-        self.ch8_flag = False
-        self.ch9_flag = False
-        self.ch10_flag = False
-        self.ch11_flag = False
-        self.ch12_flag = False
-        self.ch13_flag = False
-        self.ch14_flag = False
-        self.ch15_flag = False
 
     def _init_instrument_ui(self) -> None:
         self.ui_start.OK_button.clicked.connect(self.start_main_window)
@@ -256,6 +237,7 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_main.set_i_solenoid_slider_1.sliderReleased.connect(self.set_i_solenoid_slider_1)
 
         self.ui_main.check_local_solenoid_2.stateChanged.connect(self.solenoid_2_local)
+        # TODO:remove setDisabled 
         self.ui_main.check_remote_solenoid_2.setDisabled(True)
         self.ui_main.check_remote_solenoid_2.stateChanged.connect(self.solenoid_2_remote)
         self.ui_main.solenoid_start_2.stateChanged.connect(self.solenoid_2_remote_start)
@@ -280,23 +262,6 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_main.set_rrg_slider.sliderReleased.connect(self.set_rrg_slider)
 
         self.ui_main.set_rrg_state.currentIndexChanged.connect(self.set_rrg_state)
-
-        self.ui_main.ch0_push.clicked.connect(self.display_ch0)
-        self.ui_main.ch1_push.clicked.connect(self.display_ch1)
-        self.ui_main.ch2_push.clicked.connect(self.display_ch2)
-        self.ui_main.ch3_push.clicked.connect(self.display_ch3)
-        self.ui_main.ch4_push.clicked.connect(self.display_ch4)
-        self.ui_main.ch5_push.clicked.connect(self.display_ch5)
-        self.ui_main.ch6_push.clicked.connect(self.display_ch6)
-        self.ui_main.ch7_push.clicked.connect(self.display_ch7)
-        self.ui_main.ch8_push.clicked.connect(self.display_ch8)
-        self.ui_main.ch9_push.clicked.connect(self.display_ch9)
-        self.ui_main.ch10_push.clicked.connect(self.display_ch10)
-        self.ui_main.ch11_push.clicked.connect(self.display_ch11)
-        self.ui_main.ch12_push.clicked.connect(self.display_ch12)
-        self.ui_main.ch13_push.clicked.connect(self.display_ch13)
-        self.ui_main.ch14_push.clicked.connect(self.display_ch14)
-        self.ui_main.ch15_push.clicked.connect(self.display_ch15)
 
     def __del__(self):
         self.reading_thread.terminate()
@@ -327,10 +292,9 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_main = test_ui.Ui_MainWindow()
         self.ui_mainwindow = QtWidgets.QMainWindow()
         self.ui_main.setupUi(self.ui_mainwindow)
-
         self.ui_start = start_experiment_dialog.Ui_Dialog()
         self.ui_start_dialog = QtWidgets.QDialog()
-        self.ui_start.setupUi(self.ui_start_dialog, get_available_facilities())
+        self.ui_start.setupUi(self.ui_start_dialog)
 
     def setup_graph(self, canvas: pyqtgraph.GraphicsLayoutWidget):
         canvas.setAxisItems({'bottom': pyqtgraph.DateAxisItem()})
@@ -357,9 +321,10 @@ class PLMControl(QtWidgets.QMainWindow):
                     facility=self.ui_start.facility.currentText(),
                     sample=self.ui_start.sample.text(),
                     description=self.ui_start.description.toPlainText(),
-                    spectroscopy=self.ui_start.spectroscopy.isChecked(),
-                    mass_spectrum=self.ui_start.mass_spectroscopy.isChecked(),
-                    probe=self.ui_start.probe.isChecked()
+                    # TODO: remove that fields from database schema
+                    spectroscopy=None,
+                    mass_spectrum=None,
+                    probe=None
                     )
         self.session.add(info)
         self.session.commit()
@@ -385,55 +350,7 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_main.set_timer.setText(self.timeFormat)
 
     def init_graphs(self):
-        # self.setup_graph(self.ui_main.sample_graph)
-        # self.setup_graph(self.ui_main.discharge_graph)
-        # self.setup_graph(self.ui_main.cathode_graph)
-        # self.setup_graph(self.ui_main.thermocouples_graph)
-        # self.setup_graph(self.ui_main.thermocouples_graph_full)
-        # self.setup_graph(self.ui_main.pressure_graph)
-
-        sample_i = self.ui_main.sample_graph.addPlot(row=0, col=0)
-        sample_u = self.ui_main.sample_graph.addPlot(row=1, col=0)
-        self.setup_graph(sample_i)
-        self.setup_graph(sample_u)
-        self.i_sample_plt = create_plot(sample_i, self.graph_size, name='I', pen=1)
-        self.u_sample_plt = create_plot(sample_u, self.graph_size, name='U', pen=2)
-
-        discharge_i = self.ui_main.discharge_graph.addPlot(row=0, col=0)
-        discharge_u = self.ui_main.discharge_graph.addPlot(row=1, col=0)
-        discharge_p = self.ui_main.discharge_graph.addPlot(row=2, col=0)
-        self.setup_graph(discharge_i)
-        self.setup_graph(discharge_u)
-        self.setup_graph(discharge_p)
-        self.u_discharge_plt = create_plot(discharge_u, self.graph_size, name='U', pen=1)
-        self.i_discharge_plt = create_plot(discharge_i, self.graph_size, name='I', pen=2)
-        self.p_discharge_plt = create_plot(discharge_p, self.graph_size, name='P', pen=3)
-
-        cathode_i = self.ui_main.cathode_graph.addPlot(row=0, col=0)
-        cathode_u = self.ui_main.cathode_graph.addPlot(row=1, col=0)
-        cathode_p = self.ui_main.cathode_graph.addPlot(row=2, col=0)
-        cathode_t = self.ui_main.cathode_graph.addPlot(row=3, col=0)
-        self.setup_graph(cathode_i)
-        self.setup_graph(cathode_u)
-        self.setup_graph(cathode_p)
-        self.setup_graph(cathode_t)
-        self.u_cathode_plt = create_plot(cathode_u, self.graph_size, name='U', pen=1)
-        self.i_cathode_plt = create_plot(cathode_i, self.graph_size, name='I', pen=2)
-        self.p_cathode_plt = create_plot(cathode_p, self.graph_size, name='P', pen=3)
-        self.t_cathode_plt = create_plot(cathode_t, self.graph_size, name='T', pen=4)
-
-        gas_flow = self.ui_main.pressure_graph.addPlot(row=0, col=0)
-        pressure_1 = self.ui_main.pressure_graph.addPlot(row=1, col=0)
-        # pressure_2 = self.ui_main.pressure_graph.addPlot(row=2, col=0)
-        # pressure_3 = self.ui_main.pressure_graph.addPlot(row=3, col=0)
-        self.setup_graph(gas_flow)
-        self.setup_graph(pressure_1)
-        # self.setup_graph(pressure_2)
-        # self.setup_graph(pressure_3)
-        self.gas_flow_plt = create_plot(gas_flow, self.graph_size, name='G, %', pen=1)
-        self.pressure_1_plt = create_plot(pressure_1, self.graph_size, name='P1, Торр', pen=2)
-        self.pressure_2_plt = create_plot(pressure_1, self.graph_size, name='P2, Торр', pen=5)
-        self.pressure_3_plt = create_plot(pressure_1, self.graph_size, name='P3, Торр', pen=7)
+        pass
 
     def _get_configs(self) -> dict:
         """ Получить конфигурационные данные, выбранной установки """
@@ -456,7 +373,6 @@ class PLMControl(QtWidgets.QMainWindow):
         self.config = self._get_configs()
 
         self.read_interval = float(self.config['Read_interval'])
-        self.journal_auto_update = float(self.config['Journal_auto_update'])
         self.k = float(self.config['k_value'])
         self.graph_size = int(self.config['Graph_size'])
         self.mqtt_configs = self.config["mqtt"] if "mqtt" in self.config else {}
@@ -641,161 +557,10 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_main.p_2_actual.setText(str('%.2E' % pressure_2))
         self.ui_main.p_3_actual.setText(str('%.2E' % pressure_3))
 
-        [self.u_cathode_plt[0], self.u_cathode_plt[1]] = update_plot(self.u_cathode_plt[0],
-                                                                     self.u_cathode_plt[1],
-                                                                     self.u_cathode_plt[2],
-                                                                     cathode_voltage)
-        [self.i_cathode_plt[0], self.i_cathode_plt[1]] = update_plot(self.i_cathode_plt[0],
-                                                                     self.i_cathode_plt[1],
-                                                                     self.i_cathode_plt[2],
-                                                                     cathode_current)
-        [self.p_cathode_plt[0], self.p_cathode_plt[1]] = update_plot(self.p_cathode_plt[0],
-                                                                     self.p_cathode_plt[1],
-                                                                     self.p_cathode_plt[2],
-                                                                     cathode_power)
-        [self.t_cathode_plt[0], self.t_cathode_plt[1]] = update_plot(self.t_cathode_plt[0],
-                                                                     self.t_cathode_plt[1],
-                                                                     self.t_cathode_plt[2],
-                                                                     cathode_temp)
-
-        [self.i_discharge_plt[0], self.i_discharge_plt[1]] = update_plot(self.i_discharge_plt[0],
-                                                                         self.i_discharge_plt[1],
-                                                                         self.i_discharge_plt[2],
-                                                                         discharge_current)
-        [self.u_discharge_plt[0], self.u_discharge_plt[1]] = update_plot(self.u_discharge_plt[0],
-                                                                         self.u_discharge_plt[1],
-                                                                         self.u_discharge_plt[2],
-                                                                         discharge_voltage)
-        [self.p_discharge_plt[0], self.p_discharge_plt[1]] = update_plot(self.p_discharge_plt[0],
-                                                                         self.p_discharge_plt[1],
-                                                                         self.p_discharge_plt[2],
-                                                                         discharge_power)
-
-        [self.i_sample_plt[0], self.i_sample_plt[1]] = update_plot(self.i_sample_plt[0],
-                                                                   self.i_sample_plt[1],
-                                                                   self.i_sample_plt[2],
-                                                                   sample_current)
-        [self.u_sample_plt[0], self.u_sample_plt[1]] = update_plot(self.u_sample_plt[0],
-                                                                   self.u_sample_plt[1],
-                                                                   self.u_sample_plt[2],
-                                                                   sample_voltage)
-        [self.pressure_1_plt[0], self.pressure_1_plt[1]] = update_plot(self.pressure_1_plt[0],
-                                                                       self.pressure_1_plt[1],
-                                                                       self.pressure_1_plt[2],
-                                                                       pressure_1)
-        [self.pressure_2_plt[0], self.pressure_2_plt[1]] = update_plot(self.pressure_2_plt[0],
-                                                                       self.pressure_2_plt[1],
-                                                                       self.pressure_2_plt[2],
-                                                                       pressure_2)
-        [self.pressure_3_plt[0], self.pressure_3_plt[1]] = update_plot(self.pressure_3_plt[0],
-                                                                       self.pressure_3_plt[1],
-                                                                       self.pressure_3_plt[2],
-                                                                       pressure_3)
-        [self.gas_flow_plt[0], self.gas_flow_plt[1]] = update_plot(self.gas_flow_plt[0],
-                                                                   self.gas_flow_plt[1],
-                                                                   self.gas_flow_plt[2],
-                                                                   gas_flow)
-
-        if self.ch0_flag:
-            self.ui_main.ch0.setText(str(thermocouples['CH0']))
-            [self.ch0_plt[0], self.ch0_plt[1]] = update_plot(self.ch0_plt[0],
-                                                             self.ch0_plt[1],
-                                                             self.ch0_plt[2],
-                                                             thermocouples['CH0'])
-        if self.ch1_flag:
-            self.ui_main.ch1.setText(str(thermocouples['CH1']))
-            [self.ch1_plt[0], self.ch1_plt[1]] = update_plot(self.ch1_plt[0],
-                                                             self.ch1_plt[1],
-                                                             self.ch1_plt[2],
-                                                             thermocouples['CH1'])
-        if self.ch2_flag:
-            self.ui_main.ch2.setText(str(thermocouples['CH2']))
-            [self.ch2_plt[0], self.ch2_plt[1]] = update_plot(self.ch2_plt[0],
-                                                             self.ch2_plt[1],
-                                                             self.ch2_plt[2],
-                                                             thermocouples['CH2'])
-        if self.ch3_flag:
-            self.ui_main.ch3.setText(str(thermocouples['CH3']))
-            [self.ch3_plt[0], self.ch3_plt[1]] = update_plot(self.ch3_plt[0],
-                                                             self.ch3_plt[1],
-                                                             self.ch3_plt[2],
-                                                             thermocouples['CH3'])
-        if self.ch4_flag:
-            self.ui_main.ch4.setText(str(thermocouples['CH4']))
-            [self.ch4_plt[0], self.ch4_plt[1]] = update_plot(self.ch4_plt[0],
-                                                             self.ch4_plt[1],
-                                                             self.ch4_plt[2],
-                                                             thermocouples['CH4'])
-        if self.ch5_flag:
-            self.ui_main.ch5.setText(str(thermocouples['CH5']))
-            [self.ch5_plt[0], self.ch5_plt[1]] = update_plot(self.ch5_plt[0],
-                                                             self.ch5_plt[1],
-                                                             self.ch5_plt[2],
-                                                             thermocouples['CH5'])
-        if self.ch6_flag:
-            self.ui_main.ch6.setText(str(thermocouples['CH6']))
-            [self.ch6_plt[0], self.ch6_plt[1]] = update_plot(self.ch6_plt[0],
-                                                             self.ch6_plt[1],
-                                                             self.ch6_plt[2],
-                                                             thermocouples['CH6'])
-        if self.ch7_flag:
-            self.ui_main.ch7.setText(str(thermocouples['CH7']))
-            [self.ch7_plt[0], self.ch7_plt[1]] = update_plot(self.ch7_plt[0],
-                                                             self.ch7_plt[1],
-                                                             self.ch7_plt[2],
-                                                             thermocouples['CH7'])
-        if self.ch8_flag:
-            self.ui_main.ch8.setText(str(thermocouples['CH8']))
-            [self.ch8_plt[0], self.ch8_plt[1]] = update_plot(self.ch8_plt[0],
-                                                             self.ch8_plt[1],
-                                                             self.ch8_plt[2],
-                                                             thermocouples['CH8'])
-        if self.ch9_flag:
-            self.ui_main.ch9.setText(str(thermocouples['CH9']))
-            [self.ch9_plt[0], self.ch9_plt[1]] = update_plot(self.ch9_plt[0],
-                                                             self.ch9_plt[1],
-                                                             self.ch9_plt[2],
-                                                             thermocouples['CH9'])
-        if self.ch10_flag:
-            self.ui_main.ch10.setText(str(thermocouples['CH10']))
-            [self.ch10_plt[0], self.ch10_plt[1]] = update_plot(self.ch10_plt[0],
-                                                               self.ch10_plt[1],
-                                                               self.ch10_plt[2],
-                                                               thermocouples['CH10'])
-        if self.ch11_flag:
-            self.ui_main.ch11.setText(str(thermocouples['CH11']))
-            [self.ch11_plt[0], self.ch11_plt[1]] = update_plot(self.ch11_plt[0],
-                                                               self.ch11_plt[1],
-                                                               self.ch11_plt[2],
-                                                               thermocouples['CH11'])
-        if self.ch12_flag:
-            self.ui_main.ch12.setText(str(thermocouples['CH12']))
-            [self.ch12_plt[0], self.ch12_plt[1]] = update_plot(self.ch12_plt[0],
-                                                               self.ch12_plt[1],
-                                                               self.ch12_plt[2],
-                                                               thermocouples['CH12'])
-        if self.ch13_flag:
-            self.ui_main.ch13.setText(str(thermocouples['CH13']))
-            [self.ch13_plt[0], self.ch13_plt[1]] = update_plot(self.ch13_plt[0],
-                                                               self.ch13_plt[1],
-                                                               self.ch13_plt[2],
-                                                               thermocouples['CH13'])
-        if self.ch14_flag:
-            self.ui_main.ch14.setText(str(thermocouples['CH14']))
-            [self.ch14_plt[0], self.ch14_plt[1]] = update_plot(self.ch14_plt[0],
-                                                               self.ch14_plt[1],
-                                                               self.ch14_plt[2],
-                                                               thermocouples['CH14'])
-        if self.ch15_flag:
-            self.ui_main.ch15.setText(str(thermocouples['CH15']))
-            [self.ch15_plt[0], self.ch15_plt[1]] = update_plot(self.ch15_plt[0],
-                                                               self.ch15_plt[1],
-                                                               self.ch15_plt[2],
-                                                               thermocouples['CH15'])
-
     def set_writing_routine(self, instruments: dict, thermocouples: dict, timestamp: float):
         if self.start_db_writing:
             commit = Instruments(
+                # TODO: remove unnecessary fields in database schema
                 time=None,
                 time_experiment=None,
                 timestamp_abs=str(timestamp),
@@ -805,169 +570,6 @@ class PLMControl(QtWidgets.QMainWindow):
             )
             self.session.add(commit)
             self.session.commit()
-
-    def display_ch0(self):
-        if not self.ch0_flag:
-            self.ch0_flag = True
-            self.ch0_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH0', pen=0)
-            self.ch0_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH0', pen=0)
-        else:
-            self.ch0_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch0_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch0_plt[2])
-            self.ui_main.ch0.setText('0')
-
-    def display_ch1(self):
-        if not self.ch1_flag:
-            self.ch1_flag = True
-            self.ch1_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH1', pen=1)
-            self.ch1_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH1', pen=1)
-        else:
-            self.ch1_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch1_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch1_plt[2])
-            self.ui_main.ch1.setText('0')
-
-    def display_ch2(self):
-        if not self.ch2_flag:
-            self.ch2_flag = True
-            self.ch2_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH2', pen=2)
-            self.ch2_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH2', pen=2)
-        else:
-            self.ch2_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch2_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch2_plt[2])
-            self.ui_main.ch2.setText('0')
-
-    def display_ch3(self):
-        if not self.ch3_flag:
-            self.ch3_flag = True
-            self.ch3_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH3', pen=3)
-            self.ch3_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH3', pen=3)
-        else:
-            self.ch3_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch3_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch3_plt[2])
-
-    def display_ch4(self):
-        if not self.ch4_flag:
-            self.ch4_flag = True
-            self.ch4_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH4', pen=4)
-            self.ch4_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH4', pen=4)
-        else:
-            self.ch4_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch4_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch4_plt[2])
-
-    def display_ch5(self):
-        if not self.ch5_flag:
-            self.ch5_flag = True
-            self.ch5_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH5', pen=5)
-            self.ch5_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH5', pen=5)
-        else:
-            self.ch5_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch5_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch5_plt[2])
-
-    def display_ch6(self):
-        if not self.ch6_flag:
-            self.ch6_flag = True
-            self.ch6_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH6', pen=6)
-            self.ch6_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH6', pen=6)
-        else:
-            self.ch6_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch6_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch6_plt[2])
-
-    def display_ch7(self):
-        if not self.ch7_flag:
-            self.ch7_flag = True
-            self.ch7_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH7', pen=7)
-            self.ch7_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH7', pen=7)
-        else:
-            self.ch7_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch7_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch7_plt[2])
-
-    def display_ch8(self):
-        if not self.ch8_flag:
-            self.ch8_flag = True
-            self.ch8_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH8', pen=8)
-            self.ch8_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH8', pen=8)
-        else:
-            self.ch8_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch8_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch8_plt[2])
-
-    def display_ch9(self):
-        if not self.ch9_flag:
-            self.ch9_flag = True
-            self.ch9_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH9', pen=9)
-            self.ch9_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH9', pen=9)
-        else:
-            self.ch9_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch9_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch9_plt[2])
-
-    def display_ch10(self):
-        if not self.ch10_flag:
-            self.ch10_flag = True
-            self.ch10_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH10',pen=10)
-            self.ch10_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH10', pen=10)
-        else:
-            self.ch10_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch10_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch10_plt[2])
-
-    def display_ch11(self):
-        if not self.ch11_flag:
-            self.ch11_flag = True
-            self.ch11_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH11', pen=11)
-            self.ch11_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH11', pen=11)
-        else:
-            self.ch11_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch11_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch11_plt[2])
-
-    def display_ch12(self):
-        if not self.ch12_flag:
-            self.ch12_flag = True
-            self.ch12_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH12', pen=12)
-            self.ch12_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH12',pen=12)
-        else:
-            self.ch12_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch12_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch12_plt[2])
-
-    def display_ch13(self):
-        if not self.ch13_flag:
-            self.ch13_flag = True
-            self.ch13_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH13', pen=13)
-            self.ch13_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH13', pen=13)
-        else:
-            self.ch13_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch13_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch13_plt[2])
-
-    def display_ch14(self):
-        if not self.ch14_flag:
-            self.ch14_flag = True
-            self.ch14_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH14', pen=14)
-            self.ch14_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH14', pen=14)
-        else:
-            self.ch14_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch14_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch14_plt[2])
-
-    def display_ch15(self):
-        if not self.ch15_flag:
-            self.ch15_flag = True
-            self.ch15_plt = create_plot(self.ui_main.thermocouples_graph_full, self.graph_size, name='CH15', pen=15)
-            self.ch15_plt_fast = create_plot(self.ui_main.thermocouples_graph, self.thermocouple_array_size, name='CH15', pen=15)
-        else:
-            self.ch15_flag = False
-            self.ui_main.thermocouples_graph.removeItem(self.ch15_plt_fast[2])
-            self.ui_main.thermocouples_graph_full.removeItem(self.ch15_plt[2])
 
     def sample_local(self):
         if self.ui_main.check_local_sample.isChecked():
