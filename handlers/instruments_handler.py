@@ -13,7 +13,6 @@ class SCPIInstrument:
         
         self.name = name  # название прибора
         self.isInitialized = bool()  # флаг инициализации
-        # self.sleep_time = sleep_time  # интервал между командами
         try:
             if connection_type == 'TCPIP':  # Первый способ установки соединения с прибором
                 self.instrument = rm.open_resource(f'TCPIP::{ip}::inst0::INSTR')
@@ -103,7 +102,7 @@ class SCPIInstrument:
         try:   
             return self._query('*IDN?')
         except:
-            return 0.0
+            return "NODEVICE"
 
     def set_output_on(self):
         """

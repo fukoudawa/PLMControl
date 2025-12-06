@@ -41,7 +41,7 @@ class Plot:
     def update(self, timestamp, value):
         _x = np.delete(self._time_axis, 0)
         self._time_axis = np.append(_x, timestamp)
-        if isinstance(value, list):
+        if self._curve_number > 1:
             for i in range(self._curve_number):
                 _y = np.delete(self._data[i], 0)
                 self._data[i] = np.append(_y, value)
@@ -101,7 +101,7 @@ class Reader(QtCore.QObject):
 
     def __init__(
         self,
-        read_interval : int,
+        read_interval : float,
         sample        : SCPIInstrument, 
         discharge     : SCPIInstrument,  
         solenoid_1    : SCPIInstrument,
@@ -136,7 +136,7 @@ class Reader(QtCore.QObject):
 
     def run(self) -> None:
         while True:
-            delay = timedelta(seconds=self.read_interval)
+            delay = timedelta(milliseconds=10)
             deadline = datetime.now() + delay 
             instrument_data   = {}
             thermocouple_data = {}
@@ -213,8 +213,7 @@ class Reader(QtCore.QObject):
             self.client.disconnect()
             if datetime.now() < deadline:
                 pass
-            else:
-                print(f"Reader: deadline exceeded by {(datetime.now() - deadline).microseconds * 1e-3} ms")
+
 
 class PLMControl(QtWidgets.QMainWindow):
 
@@ -330,11 +329,6 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_start_dialog = QtWidgets.QDialog()
         self.ui_start.setupUi(self.ui_start_dialog)
 
-    # def setup_graph(self, canvas: pyqtgraph.GraphicsLayoutWidget):
-    #     canvas.setAxisItems({'bottom': pyqtgraph.DateAxisItem()})
-    #     canvas.showGrid(x=True, y=True)
-    #     canvas.addLegend()
-
     def start_main_window(self):
         self.ui_start_dialog.close()
         self._init_main()
@@ -390,22 +384,6 @@ class PLMControl(QtWidgets.QMainWindow):
         return plot
 
     def init_graphs(self):
-        # self.plots = {
-        #     "sample_voltage": self._setup_graph(self.ui_main.sample_graph, 0, 0),
-        #     "sample_current": self._setup_graph(self.ui_main.sample_graph, 1, 0),
-        #     "discharge_voltage": self._setup_graph(self.ui_main.discharge_graph, 0, 0),
-        #     "discharge_current": self._setup_graph(self.ui_main.discharge_graph, 1, 0),
-        #     "discharge_power": self._setup_graph(self.ui_main.discharge_graph, 2, 0),
-        #     "cathode_voltage": self._setup_graph(self.ui_main.cathode_graph, 0, 0),
-        #     "cathode_current": self._setup_graph(self.ui_main.cathode_graph, 1, 0),
-        #     "cathode_power": self._setup_graph(self.ui_main.cathode_graph, 2, 0),
-        #     "T_cathode": self._setup_graph(self.ui_main.cathode_graph, 3, 0),
-        #     "rrg_value": self._setup_graph(self.ui_main.pressure_graph, 0, 0),
-        #     "pressure_1": self._setup_graph(self.ui_main.pressure_graph, 1, 0),
-        #     "pressure_2": self._setup_graph(self.ui_main.pressure_graph, 2, 0),
-        #     "pressure_3": self._setup_graph(self.ui_main.pressure_graph, 3, 0),
-        #     "thermocouples": self._setup_graph(self.ui_main.thermocouples_graph, 0, 0)
-        # }
         self.instrument_plots: dict[str, Plot] = {
             "sample_voltage": Plot(self.ui_main.sample_graph, 0, "V", self.graph_size),
             "sample_current": Plot(self.ui_main.sample_graph, 1, "I", self.graph_size),
@@ -422,9 +400,6 @@ class PLMControl(QtWidgets.QMainWindow):
             "pressure_3": Plot(self.ui_main.pressure_graph, 3, "p3", self.graph_size)
         }
         self.thermocouple_plots = Plot(self.ui_main.thermocouples_graph, 0, "CH", self.graph_size, curve_number=self.thermocouple_channel_stop)
-    
-    def update_graphs(self):
-        pass
 
     def _get_configs(self) -> dict:
         """ Получить конфигурационные данные, выбранной установки """
@@ -588,13 +563,7 @@ class PLMControl(QtWidgets.QMainWindow):
         self.pressure_3 = VacuumeterERSTEVAK(ip=self.pressure_3_ip, port=self.pressure_3_port,
                                              address=self.pressure_3_address)
 
-    def get_values(self, instrument_value: dict[str, float], thermocouple_value: dict[str, float], timestamp: float):
-        instruments_data   = instrument_value
-        thermocouples_data = thermocouple_value
-        self.display_values(instruments_data, thermocouples_data, timestamp)
-        self.set_writing_routine(instruments_data, thermocouples_data, timestamp)
-
-    def display_values(self, instruments, thermocouples, timestamp):
+    def get_values(self, instruments: dict[str, float], thermocouples: dict[str, float], timestamp: float):
         sample_voltage = instruments['sample_voltage']
         sample_current = instruments['sample_current']
         discharge_voltage = instruments['discharge_voltage']
@@ -633,8 +602,8 @@ class PLMControl(QtWidgets.QMainWindow):
 
         for key, plot in self.instrument_plots.items():
             plot.update(timestamp, instruments[key])
+        self.thermocouple_plots.update(timestamp, [value for _, value in thermocouples.items()])
 
-    def set_writing_routine(self, instruments: dict, thermocouples: dict, timestamp: float):
         if self.start_db_writing:
             commit = Instruments(
                 # TODO: remove unnecessary fields in database schema
@@ -984,7 +953,7 @@ class PLMControl(QtWidgets.QMainWindow):
 
     def get_rrg_state(self):
         state = self.rrg.get_state()
-        self.ui_main.set_rrg_state.setCurrentIndex(state) #type:ignore
+        self.ui_main.set_rrg_state.setCurrentIndex(state)
 
     def set_rrg_state(self):
         # 0 - открыт, 1 - закрыт, 2 - регулировка
@@ -993,6 +962,7 @@ class PLMControl(QtWidgets.QMainWindow):
         if state == 0:
             self.ui_main.set_rrg.setDisabled(False)
             self.ui_main.set_rrg_slider.setDisabled(False)
+            # TODO: setValue to maximum displayable value
             self.ui_main.set_rrg.setValue(100)
             self.ui_main.set_rrg_slider.setValue(100)
         if state == 1:

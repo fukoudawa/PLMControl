@@ -144,6 +144,8 @@ class MQTTDevice:
     
 
 class MQTTProducer:
+    # TODO: dunder-методы __enter__ и __exit__ для работы клиента как контекстного менеджера
+
     def __init__(self, configs: Optional[dict] = None) -> None:
         self.__broker   : str | None = None                  # адресс брокера
         self.__port     : int | None = None                  # порт брокера
