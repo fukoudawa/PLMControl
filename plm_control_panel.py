@@ -22,35 +22,20 @@ from typing import Callable
 class Plot:
     def __init__(self, canvas: pyqtgraph.GraphicsLayoutWidget, index: int, legend: str, graph_size: int, curve_number:int=1):
         self._curve_number = curve_number
-        self._time_axis = np.zeros(shape=graph_size)
-        self._data = list()
-        self._curves = list()
-        for i in range(curve_number):
-            self._data.append(np.zeros(shape=graph_size))
+        self._time_axis = np.linspace((datetime.now() - timedelta(seconds=graph_size)).timestamp(), datetime.now().timestamp(), graph_size)
+        self._data = np.ones(shape=graph_size)
         self.plot_view = canvas.addPlot(row=index, col=0)
         self.plot_view.setAxisItems({'bottom': pyqtgraph.DateAxisItem()})
         self.plot_view.showGrid(True, True)
-        if curve_number == 1:
-            self._curves.append(self.plot_view.plot(self._time_axis, self._data[0], pen=pyqtgraph.mkPen(color=pyqtgraph.intColor(index+i)), name=legend))
-            self.plot_view.addLegend()
-        else:
-            for i in range(curve_number):
-                self._curves.append(self.plot_view.plot(self._time_axis, self._data[i], pen=pyqtgraph.mkPen(color=pyqtgraph.intColor(index+i)), name=f"{legend}{i}"))
-            self.plot_view.addLegend()
+        self._curve = self.plot_view.plot(self._time_axis, self._data, pen=pyqtgraph.mkPen(color=pyqtgraph.intColor(index+1), name=legend))
+        self.plot_view.addLegend()
 
     def update(self, timestamp, value):
         _x = np.delete(self._time_axis, 0)
         self._time_axis = np.append(_x, timestamp)
-        if self._curve_number > 1:
-            for i in range(self._curve_number):
-                _y = np.delete(self._data[i], 0)
-                self._data[i] = np.append(_y, value)
-                self._curves[i].setData(self._time_axis, self._data[i])
-        else:
-            _y = np.delete(self._data[0], 0)
-            self._data[0] = np.append(_y, value)
-            self._curves[0].setData(self._time_axis, self._data[0])
-
+        _y = np.delete(self._data, 0)
+        self._data = np.append(_y, value)
+        self._curve.setData(self._time_axis, self._data)
 
 def get_available_facilities() -> list:
     """ Получить список доступных установок """
@@ -136,69 +121,46 @@ class Reader(QtCore.QObject):
 
     def run(self) -> None:
         while True:
-            delay = timedelta(milliseconds=10)
+            start = time.perf_counter()
+            delay = timedelta(milliseconds=self.read_interval)
             deadline = datetime.now() + delay 
             instrument_data   = {}
             thermocouple_data = {}
-
-            with ThreadPoolExecutor(max_workers = None) as executor:
-                sample_feature_current     = executor.submit(self.sample.get_current)
-                sample_feature_voltage     = executor.submit(self.sample.get_voltage)
-                discharge_feature_current  = executor.submit(self.discharge.get_current)
-                discharge_feature_voltage  = executor.submit(self.discharge.get_voltage)
-                discharge_feature_power    = executor.submit(self.discharge.get_power)
-                solenoid_1_feature_current = executor.submit(self.solenoid_1.get_current)
-                solenoid_1_feature_voltage = executor.submit(self.solenoid_1.get_voltage)
-                solenoid_2_feature_current = executor.submit(self.solenoid_2.get_current)
-                solenoid_2_feature_voltage = executor.submit(self.solenoid_2.get_voltage)
-                cathode_feature_current    = executor.submit(self.cathode.get_current)
-                cathode_feature_voltage    = executor.submit(self.cathode.get_voltage)
-                cathode_feature_power      = executor.submit(self.cathode.get_power)
-                rrg_feature_inlet          = executor.submit(self.rrg.get_flow_inlet)
-                pressure_1_feature         = executor.submit(self.pressure_1.return_value)
-                pressure_2_feature         = executor.submit(self.pressure_2.return_value)
-                pressure_3_feature         = executor.submit(self.pressure_3.return_value)
-                thermocouple_feature       = executor.submit(self.thermocouple.read_thermocouple)
-
-                # ----------------------------------------------------------------------------
-
-                instrument_data.update({"sample_current"     : sample_feature_current.result()      })
-                instrument_data.update({"sample_voltage"     : sample_feature_voltage.result()      })
-                instrument_data.update({"discharge_current"  : discharge_feature_current.result()   })
-                instrument_data.update({"discharge_voltage"  : discharge_feature_voltage.result()   })
-                instrument_data.update({"discharge_power"    : discharge_feature_power.result()     })
-                instrument_data.update({"solenoid_current_1" : solenoid_1_feature_current.result()  })
-                instrument_data.update({"solenoid_voltage_1" : solenoid_1_feature_voltage.result()  })
-                instrument_data.update({"solenoid_current_2" : solenoid_2_feature_current.result()  })
-                instrument_data.update({"solenoid_voltage_2" : solenoid_2_feature_voltage.result()  })
-                instrument_data.update({"cathode_current"    : cathode_feature_current.result()     })
-                instrument_data.update({"cathode_voltage"    : cathode_feature_voltage.result()     })
-                instrument_data.update({"cathode_power"      : cathode_feature_power.result()       })
-                instrument_data.update({"T_cathode"          : calc_cathode_temp(
-                                                                    voltage = cathode_feature_voltage.result(), 
-                                                                    current = cathode_feature_current.result(), 
-                                                                    k       = self.k)               })
-                instrument_data.update({"rrg_value"          : rrg_feature_inlet.result()           })
-                instrument_data.update({"pressure_1"         : pressure_1_feature.result()          })
-                instrument_data.update({"pressure_2"         : pressure_2_feature.result()          })
-                instrument_data.update({"pressure_3"         : pressure_3_feature.result()          })
-
-                try:
-                    thermocouple_values = thermocouple_feature.result()
-                    for i in range(self.thermocouple.thermocouple_ch_end + 1):
-                        if thermocouple_values[i] > 1450.0: 
-                            thermocouple_data.update({f"CH{i}": 0.0})
-                        else:
-                            thermocouple_data.update({f"CH{i}": round(thermocouple_values[i], 2)}) 
-                except:
-                    thermocouple_data.update({f"CH{i}": 0.0 for i in range(self.thermocouple.thermocouple_ch_end + 1)})   
-
+            
             # ----------------------- Publish the data --------------------------------
+            start_instruments = time.perf_counter()
+            instrument_data.update({"sample_current": self.sample.get_current()})
+            instrument_data.update({"sample_voltage": self.sample.get_voltage()})
+            instrument_data.update({"discharge_current": self.discharge.get_current()})
+            instrument_data.update({"discharge_voltage": self.discharge.get_voltage()})
+            instrument_data.update({"discharge_power": self.discharge.get_power()})
+            instrument_data.update({"solenoid_current_1": self.solenoid_1.get_current()})
+            instrument_data.update({"solenoid_voltage_1": self.solenoid_1.get_voltage()})
+            instrument_data.update({"solenoid_current_2": self.solenoid_2.get_current()})
+            instrument_data.update({"solenoid_voltage_2": self.solenoid_2.get_voltage()})
+            instrument_data.update({"cathode_current": self.cathode.get_current()})
+            instrument_data.update({"cathode_voltage": self.cathode.get_voltage()})
+            instrument_data.update({"cathode_power": self.cathode.get_power()})
+            instrument_data.update({"T_cathode"          : calc_cathode_temp(
+                                                                    voltage = self.cathode.get_voltage(), 
+                                                                    current = self.cathode.get_current(), 
+                                                                    k       = self.k)})
+            instrument_data.update({"rrg_value": self.rrg.get_flow_inlet()})
+            instrument_data.update({"pressure_1": self.pressure_1.return_value()})
+            instrument_data.update({"pressure_2": self.pressure_2.return_value()})
+            instrument_data.update({"pressure_3": self.pressure_3.return_value()})
+            end_instruments = time.perf_counter()
+            print(f"Instruments polling: {end_instruments-start_instruments}")
+            start_thermocouples = time.perf_counter()
+            thermocouple_data_raw = self.thermocouple.read_thermocouple()
+            for i in range(len(thermocouple_data_raw)):
+                thermocouple_data.update({f"CH{i}": thermocouple_data_raw[i]})
+            end_thermocouples = time.perf_counter()
+            print(f"Thermocouples polling: {end_thermocouples-start_thermocouples}")
             timestamp = datetime.now().timestamp()
-            try:
-                self.reader_result.emit(instrument_data, thermocouple_data, timestamp)
-            except Exception as e:
-                pass
+            print(instrument_data)
+            print(thermocouple_data)
+            self.reader_result.emit(instrument_data, thermocouple_data, timestamp)
 
             self.client.connect()
 
@@ -211,9 +173,12 @@ class Reader(QtCore.QObject):
             self.client.publish(timestamp, "timestamp")
 
             self.client.disconnect()
+            end = time.perf_counter()
+            print(f"Full reader cycle: {end - start}")
             if datetime.now() < deadline:
                 pass
-
+            end = time.perf_counter()
+            print(f"Target reader cycle: {self.read_interval}, got {end - start}")
 
 class PLMControl(QtWidgets.QMainWindow):
 
@@ -399,7 +364,7 @@ class PLMControl(QtWidgets.QMainWindow):
             "pressure_2": Plot(self.ui_main.pressure_graph, 2, "p2", self.graph_size),
             "pressure_3": Plot(self.ui_main.pressure_graph, 3, "p3", self.graph_size)
         }
-        self.thermocouple_plots = Plot(self.ui_main.thermocouples_graph, 0, "CH", self.graph_size, curve_number=self.thermocouple_channel_stop)
+        # self.thermocouple_plots = Plot(self.ui_main.thermocouples_graph, 0, "CH", self.graph_size, curve_number=self.thermocouple_channel_stop)
 
     def _get_configs(self) -> dict:
         """ Получить конфигурационные данные, выбранной установки """
@@ -549,12 +514,9 @@ class PLMControl(QtWidgets.QMainWindow):
 
         self.thermocouple = NIDAQInstrument(self.thermocouple_path, 'thermocouples', self.thermocouple_channel_start,
                                             self.thermocouple_channel_stop)
-
         self.thermocouple.create_multiple_thermocouples()
-        try:
-            self.thermocouple.task.timing.adc_sample_high_speed()
-        except Exception:
-            pass
+        for i in range(self.thermocouple_channel_stop - self.thermocouple_channel_start + 1):
+            self.ui_main.thermocoples_table.insertRow(i)
 
         self.pressure_1 = VacuumeterERSTEVAK(ip=self.pressure_1_ip, port=self.pressure_1_port,
                                              address=self.pressure_1_address)
@@ -599,10 +561,15 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_main.p_1_actual.setText(str('%.2E' % pressure_1))
         self.ui_main.p_2_actual.setText(str('%.2E' % pressure_2))
         self.ui_main.p_3_actual.setText(str('%.2E' % pressure_3))
+        i_k = 0
+        for k, v in thermocouples.items():
+            self.ui_main.thermocoples_table.setItem(i_k, 0, QtWidgets.QTableWidgetItem(str(k)))
+            self.ui_main.thermocoples_table.setItem(i_k, 1, QtWidgets.QTableWidgetItem(str(v)))
+            i_k += 1
 
         for key, plot in self.instrument_plots.items():
             plot.update(timestamp, instruments[key])
-        self.thermocouple_plots.update(timestamp, [value for _, value in thermocouples.items()])
+        # self.thermocouple_plots.update(timestamp, [value for _, value in thermocouples.items()])
 
         if self.start_db_writing:
             commit = Instruments(

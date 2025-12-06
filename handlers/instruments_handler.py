@@ -1,6 +1,4 @@
 from nidaqmx import Task, constants
-import time
-import serial
 from pymodbus.client import ModbusSerialClient
 import socket
 
@@ -140,6 +138,9 @@ class SCPIInstrument:
             self._query('SYSTEM:REMOTE')
         except Exception:
             print(f'{self.name}: Cannot set device to remote mode')
+    
+    def __del__(self):
+        self.instrument.close()
 
 
 class RRGInstrument:
@@ -150,7 +151,8 @@ class RRGInstrument:
         try:
             self.client = ModbusSerialClient(port=port, baudrate=baudrate)
             self.client.connect()
-            self.isInitialized = True
+            # TODO: РРГ сломался, затем нужно поменять конструкцию, чтобы флаг isInitialized устанавливался без ошибок
+            # self.isInitialized = True
             
             print("(+) RRG initialized")
         except Exception as e:
@@ -159,18 +161,21 @@ class RRGInstrument:
             print("(!) Failed to initialize RRG:\t", e)
 
     def _get_holding_registers(self):
-        try:
-            rr = self.client.read_holding_registers(address=0, count=7, device_id=self.unit) 
-            self.holding_registers = rr.registers  # list of ints
-            self.flag_1 = bin(self.holding_registers[2])  # binary string
-            self.flag_1 = self.flag_1[::-1]  # reversed binary string
-            self.flag_1 = self.flag_1[:-2]   # reversed binary string without 0b
-            # преобразование строки в список целых чисел
-            self.flag_1_int = [int(self.flag_1[i]) for i in range(len(self.flag_1))]
+        if self.isInitialized:
+            try:
+                rr = self.client.read_holding_registers(address=0, count=7, device_id=self.unit) 
+                self.holding_registers = rr.registers  # list of ints
+                self.flag_1 = bin(self.holding_registers[2])  # binary string
+                self.flag_1 = self.flag_1[::-1]  # reversed binary string
+                self.flag_1 = self.flag_1[:-2]   # reversed binary string without 0b
+                # преобразование строки в список целых чисел
+                self.flag_1_int = [int(self.flag_1[i]) for i in range(len(self.flag_1))]
 
-        except Exception as e:
-            if self.isInitialized:
-                print(f'(ERROR) RRG: Cannot get holding registers: {e}')
+            except Exception as e:
+                if self.isInitialized:
+                    print(f'(ERROR) RRG: Cannot get holding registers: {e}')
+        else:
+            print(f"[WARN]: RRG is not initialized")
 
     def get_state(self):
         result = int()
@@ -317,8 +322,8 @@ class NIDAQInstrument:
     def read_thermocouple(self):
         value = self.task.read() 
         return value
-
-    def stop_task(self):
+    
+    def __del__(self):
         self.task.close() 
 
 class VacuumeterERSTEVAK:
@@ -326,21 +331,20 @@ class VacuumeterERSTEVAK:
         self.ip = ip
         self.port = port
         self.address = address
-        self.inited = False
+        self.isInitialized = False
 
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((self.ip, self.port))
             s.close()
             print("(+) Vacuumeter reader initialized")
-            self.inited = True
+            self.isInitialized = True
         except OSError as e:
             print("(!) Failed to initialize Vacuumeter reader:\t", e)
         
     def return_value(self):
         data = 0 
-
-        if self.inited:
+        if self.isInitialized:
             try:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     s.settimeout(2)
@@ -352,7 +356,6 @@ class VacuumeterERSTEVAK:
                     data = mantissa * 10 ** exponent * 0.75  # torr
             except:
                 data = 0
-
         return data
 
     def ERSTVAK_CRC64(self, command_full):

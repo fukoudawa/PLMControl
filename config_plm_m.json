@@ -1,5 +1,5 @@
 {
-    "Read_interval": "0.01",
+    "Read_interval": "2",
     "k_value": "165.0",
     "Graph_size": "1000",
     "Path_to_write": "./Data",
@@ -60,10 +60,10 @@
     ],
     "Thermocouple": [
         {
-            "Path": "cDAQ9189-1CA7F2BMod5",
+            "Path": "cDAQ9189-1CA7F2BMod3",
             "Array_size": "1000",
             "Channel_start": "0",
-            "Channel_stop": "15",
+            "Channel_stop": "1",
             "Fast_read": "0.1"
         }
     ],
