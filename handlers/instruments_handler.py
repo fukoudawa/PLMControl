@@ -320,8 +320,11 @@ class NIDAQInstrument:
             print(f'Thermocouple {self.name} does not created')
 
     def read_thermocouple(self):
-        value = self.task.read() 
-        return value
+        try:
+            value = self.task.read()
+            return value
+        except Exception:
+            return [0.0 for i in range(self.thermocouple_ch_end - self.thermocouple_ch_start + 1)]
     
     def __del__(self):
         self.task.close() 
@@ -335,6 +338,7 @@ class VacuumeterERSTEVAK:
 
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1)
             s.connect((self.ip, self.port))
             s.close()
             print("(+) Vacuumeter reader initialized")
@@ -347,7 +351,7 @@ class VacuumeterERSTEVAK:
         if self.isInitialized:
             try:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.settimeout(2)
+                    s.settimeout(1)
                     s.connect((self.ip, self.port))
                     s.send(self.ERSTVAK_command(self.address, 'M'))
                     data = s.recv(1024).decode('ascii')

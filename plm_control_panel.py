@@ -1,8 +1,7 @@
-import random
 import pyqtgraph
 import test_ui
 import start_experiment_dialog
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from handlers.database_handler import Info, Instruments, Base
 from handlers.instruments_handler import *
 import os
@@ -12,57 +11,53 @@ import json
 import pyvisa
 from datetime import datetime, timedelta
 import numpy as np
-from os import path
-from concurrent.futures import ThreadPoolExecutor
 from handlers.mqtt_client import MQTTProducer
 import time
-from typing import Callable
-# global poll
+
 
 class Plot:
-    def __init__(self, canvas: pyqtgraph.GraphicsLayoutWidget, index: int, legend: str, graph_size: int, curve_number:int=1):
-        self._curve_number = curve_number
+    def __init__(self, canvas: pyqtgraph.GraphicsLayoutWidget, index: int, graph_size: int):
+        self.index = index
+        self.graph_size = graph_size
         self._time_axis = np.linspace((datetime.now() - timedelta(seconds=graph_size)).timestamp(), datetime.now().timestamp(), graph_size)
-        self._data = np.ones(shape=graph_size)
         self.plot_view = canvas.addPlot(row=index, col=0)
         self.plot_view.setAxisItems({'bottom': pyqtgraph.DateAxisItem()})
-        self.plot_view.showGrid(True, True)
-        self._curve = self.plot_view.plot(self._time_axis, self._data, pen=pyqtgraph.mkPen(color=pyqtgraph.intColor(index+1), name=legend))
-        self.plot_view.addLegend()
+        self.plot_view.showGrid(x=True, y=True)
+        self._curves = []
+        self._data = []
+        self._curve_idx = 0
+    
+    def create_curve(self, name):
+        self._data.append(np.ones(self.graph_size))
+        self._curves.append(self.plot_view.plot(
+            self._time_axis,
+            self._data[self._curve_idx],
+            pen=pyqtgraph.mkPen(color=pyqtgraph.intColor(self._curve_idx + self.index + 3),
+            name=name)))
+        # TODO: proper legend
+        # self.plot_view.addLegend()
+        # self.plot_view.legend.setBrush(pyqtgraph.mkBrush(30, 30, 30, 200))
+        # self.plot_view.legend.setFont(QtGui.QFont('Arial', 6))
+        # self.plot_view.legend.labelTextColor(pyqtgraph.mkColor('w'))
+        # self.plot_view.legend.layout.setSpacing(2)
 
+        self._curve_idx += 1
+        
     def update(self, timestamp, value):
         _x = np.delete(self._time_axis, 0)
         self._time_axis = np.append(_x, timestamp)
-        _y = np.delete(self._data, 0)
-        self._data = np.append(_y, value)
-        self._curve.setData(self._time_axis, self._data)
+        for i in range(self._curve_idx):
+            self._data[i] = np.delete(self._data[i], 0)
+            if isinstance(value, list):
+                self._data[i] = np.append(self._data[i], value[i])
+            else:
+                self._data[i] = np.append(self._data[i], value)
+            self._curves[i].setData(self._time_axis, self._data[i])
+
 
 def get_available_facilities() -> list:
     """ Получить список доступных установок """
     return json.load(open("config_paths.json", encoding = "utf-8")).keys()
-
-def create_plot(canvas, graph_size, name, pen):
-    # Создаёт график, передаём PlotItem, количество точек на графике, название графика в легенде и цвет
-    # Возвращает список из оси х, у и самого объекта графика
-    x = [datetime.now().timestamp() - graph_size + i for i in range(graph_size)]
-    x = np.asarray(x) # type:ignore
-    y = np.zeros(graph_size)
-    y = np.asarray(y)  # type:ignore
-    plt = canvas.plot(x, y, pen=pen, name=name)
-    return [x, y, plt]
-
-
-def update_plot(x, y, plt, y_data):
-    # Функция обновления графика
-    # На вход получает оси х, у, объект графика, и новое значение на оси у
-    # Обновляет график plt и передаёт новые оси х и у
-    x_data = datetime.now().timestamp()
-    _x = np.delete(x, 0)
-    x = np.append(_x, x_data)
-    _y = np.delete(y, 0)
-    y = np.append(_y, y_data)
-    plt.setData(x, y)
-    return [x, y]
 
 
 def calc_cathode_temp(voltage, current, k):
@@ -149,17 +144,11 @@ class Reader(QtCore.QObject):
             instrument_data.update({"pressure_1": self.pressure_1.return_value()})
             instrument_data.update({"pressure_2": self.pressure_2.return_value()})
             instrument_data.update({"pressure_3": self.pressure_3.return_value()})
-            end_instruments = time.perf_counter()
-            print(f"Instruments polling: {end_instruments-start_instruments}")
-            start_thermocouples = time.perf_counter()
             thermocouple_data_raw = self.thermocouple.read_thermocouple()
             for i in range(len(thermocouple_data_raw)):
                 thermocouple_data.update({f"CH{i}": thermocouple_data_raw[i]})
-            end_thermocouples = time.perf_counter()
-            print(f"Thermocouples polling: {end_thermocouples-start_thermocouples}")
+        
             timestamp = datetime.now().timestamp()
-            print(instrument_data)
-            print(thermocouple_data)
             self.reader_result.emit(instrument_data, thermocouple_data, timestamp)
 
             self.client.connect()
@@ -173,8 +162,6 @@ class Reader(QtCore.QObject):
             self.client.publish(timestamp, "timestamp")
 
             self.client.disconnect()
-            end = time.perf_counter()
-            print(f"Full reader cycle: {end - start}")
             if datetime.now() < deadline:
                 pass
             end = time.perf_counter()
@@ -235,8 +222,7 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_main.set_i_solenoid_slider_1.sliderReleased.connect(self.set_i_solenoid_slider_1)
 
         self.ui_main.check_local_solenoid_2.stateChanged.connect(self.solenoid_2_local)
-        # TODO:remove setDisabled 
-        self.ui_main.check_remote_solenoid_2.setDisabled(True)
+        self.ui_main.check_remote_solenoid_2.setDisabled(False)
         self.ui_main.check_remote_solenoid_2.stateChanged.connect(self.solenoid_2_remote)
         self.ui_main.solenoid_start_2.stateChanged.connect(self.solenoid_2_remote_start)
         self.ui_main.solenoid_stop_2.stateChanged.connect(self.solenoid_2_remote_stop)
@@ -350,21 +336,26 @@ class PLMControl(QtWidgets.QMainWindow):
 
     def init_graphs(self):
         self.instrument_plots: dict[str, Plot] = {
-            "sample_voltage": Plot(self.ui_main.sample_graph, 0, "V", self.graph_size),
-            "sample_current": Plot(self.ui_main.sample_graph, 1, "I", self.graph_size),
-            "discharge_voltage": Plot(self.ui_main.discharge_graph, 0, "V", self.graph_size),
-            "discharge_current": Plot(self.ui_main.discharge_graph, 1, "I", self.graph_size),
-            "discharge_power": Plot(self.ui_main.discharge_graph, 2, "P", self.graph_size),
-            "cathode_voltage": Plot(self.ui_main.cathode_graph, 0, "V", self.graph_size),
-            "cathode_current": Plot(self.ui_main.cathode_graph, 1, "I", self.graph_size),
-            "cathode_power": Plot(self.ui_main.cathode_graph, 2, "P", self.graph_size),
-            "T_cathode": Plot(self.ui_main.cathode_graph, 3, "T", self.graph_size),
-            "rrg_value": Plot(self.ui_main.pressure_graph, 0, "%", self.graph_size),
-            "pressure_1": Plot(self.ui_main.pressure_graph, 1, "p1", self.graph_size),
-            "pressure_2": Plot(self.ui_main.pressure_graph, 2, "p2", self.graph_size),
-            "pressure_3": Plot(self.ui_main.pressure_graph, 3, "p3", self.graph_size)
+            "sample_voltage": Plot(self.ui_main.sample_graph, 0, self.graph_size),
+            "sample_current": Plot(self.ui_main.sample_graph, 1, self.graph_size),
+            "discharge_voltage": Plot(self.ui_main.discharge_graph, 0, self.graph_size),
+            "discharge_current": Plot(self.ui_main.discharge_graph, 1, self.graph_size),
+            "discharge_power": Plot(self.ui_main.discharge_graph, 2, self.graph_size),
+            "cathode_voltage": Plot(self.ui_main.cathode_graph, 0, self.graph_size),
+            "cathode_current": Plot(self.ui_main.cathode_graph, 1, self.graph_size),
+            "cathode_power": Plot(self.ui_main.cathode_graph, 2, self.graph_size),
+            "T_cathode": Plot(self.ui_main.cathode_graph, 3, self.graph_size),
+            "rrg_value": Plot(self.ui_main.pressure_graph, 0, self.graph_size),
+            "pressure_1": Plot(self.ui_main.pressure_graph, 1, self.graph_size),
+            "pressure_2": Plot(self.ui_main.pressure_graph, 2, self.graph_size),
+            "pressure_3": Plot(self.ui_main.pressure_graph, 3, self.graph_size)
         }
-        # self.thermocouple_plots = Plot(self.ui_main.thermocouples_graph, 0, "CH", self.graph_size, curve_number=self.thermocouple_channel_stop)
+        self.thermocouple_plots = Plot(self.ui_main.thermocouples_graph, 0, self.graph_size)
+
+        for _, v in self.instrument_plots.items():
+            v.create_curve(" ")
+        for i in range(self.thermocouple_channel_stop - self.thermocouple_channel_start + 1):
+            self.thermocouple_plots.create_curve(f"CH{i}")
 
     def _get_configs(self) -> dict:
         """ Получить конфигурационные данные, выбранной установки """
@@ -569,7 +560,7 @@ class PLMControl(QtWidgets.QMainWindow):
 
         for key, plot in self.instrument_plots.items():
             plot.update(timestamp, instruments[key])
-        # self.thermocouple_plots.update(timestamp, [value for _, value in thermocouples.items()])
+        self.thermocouple_plots.update(timestamp, [value for _, value in thermocouples.items()])
 
         if self.start_db_writing:
             commit = Instruments(
