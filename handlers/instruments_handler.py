@@ -361,7 +361,7 @@ class VacuumeterERSTEVAK:
                     print("(+) Vacuumeter reader initialized")
                     self.isInitialized = True
                 case _: 
-                    print(f"(!) This connection method {self.config["method"]} does no exists")
+                    print(f"(!) This connection method {self.config['method']} does not exists")
         except OSError as e:
             print("(!) Failed to initialize Vacuumeter reader:\t", e)
         
@@ -419,7 +419,7 @@ class VacuumeterERSTEVAK:
                                             time.sleep(0.1)
                                             s.sendall(self.ERSTVAK_command(self.address, Ar))
                                         case _:
-                                            pass
+                                            print(f"Vacuumeter type {self.config['type']} not found, gas Ar ")
                                 case "Гелий": 
                                     match self.config["type"]:
                                         case "pirani":
@@ -435,7 +435,7 @@ class VacuumeterERSTEVAK:
                                             time.sleep(0.1)
                                             s.sendall(self.ERSTVAK_command(self.address, He))
                                         case _:
-                                            pass
+                                            print(f"Vacuumeter type {self.config['type']} not found, gas He ")
                                 case "Воздух": 
                                     match self.config["type"]:
                                         case "pirani":
@@ -451,7 +451,8 @@ class VacuumeterERSTEVAK:
                                             time.sleep(0.1)
                                             s.sendall(self.ERSTVAK_command(self.address, N2))
                                         case _:
-                                            pass
+                                            print(f"Vacuumeter type {self.config['type']} not found, gas N2 ")
+
                     case "serial":
                         with serial.Serial(port=self.config["com_port"], baudrate=self.config["baudrate"], timeout=1.0) as s:
                             match gas:
