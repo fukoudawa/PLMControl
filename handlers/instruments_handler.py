@@ -3,6 +3,8 @@ from pymodbus.client import ModbusSerialClient, ModbusTcpClient
 from pymodbus.framer import FramerRTU
 import socket
 import time
+import serial
+
 
 class SCPIInstrument:
     """
@@ -146,16 +148,16 @@ class SCPIInstrument:
 
 class RRGInstrument:
     # TODO: РРГ сломался, затем нужно поменять конструкцию, чтобы флаг isInitialized устанавливался без ошибок
-    def __init__(self, settings: dict):
+    def __init__(self, config: dict):
         self.isInitialized = bool()
-        self.unit = settings["unit"]
+        self.unit = config["unit"]
         try:
-            match settings["method"]:
+            match config["method"]:
                 case "rtu":
-                    self.client = ModbusSerialClient(port=settings["port"], baudrate=settings["baudrate"])
+                    self.client = ModbusSerialClient(port=config["port"], baudrate=config["baudrate"])
                     self.client.connect()
                 case "tcp":
-                    self.client = ModbusTcpClient(host=settings["host"], port=settings["port"], framer=FramerRTU)
+                    self.client = ModbusTcpClient(host= config["host"], port=config["port"], framer=FramerRTU)
                     self.client.connect()
             if self.client is not None:
                 self.isInitialized = True
@@ -305,7 +307,7 @@ class NIDAQInstrument:
             print("(+) Thermocouple initialized")
         except Exception:
             self.task = None
-            print(f'Thermocouple {self.name} does not initialized')
+            print(f'Thermocouple does not initialized')
             self.isInitialized = False
 
     def create_single_thermocouple(self):
@@ -317,7 +319,7 @@ class NIDAQInstrument:
                                                 cjc_source=constants.CJCSource.BUILT_IN
                                                 )
         except Exception:
-            print(f'Thermocouple {self.name} does not created')
+            print(f'Thermocouple does not created')
 
     def create_multiple_thermocouples(self):
         try:
@@ -328,7 +330,7 @@ class NIDAQInstrument:
                                             cjc_source=constants.CJCSource.BUILT_IN
                                             )
         except Exception:
-            print(f'Thermocouple {self.name} does not created')
+            print(f'Thermocouple does not created')
 
     def read_thermocouple(self):
         try:
@@ -341,19 +343,25 @@ class NIDAQInstrument:
         self.task.close() 
 
 class VacuumeterERSTEVAK:
-    def __init__(self, ip, port, address):
-        self.ip = ip
-        self.port = port
-        self.address = address
+    def __init__(self, config: dict):
+        self.config = config
         self.isInitialized = False
-
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(1)
-            s.connect((self.ip, self.port))
-            s.close()
-            print("(+) Vacuumeter reader initialized")
-            self.isInitialized = True
+            match self.config["method"]:
+                case "socket":
+                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    s.settimeout(1)
+                    s.connect((self.config["ip"], self.config["port"]))
+                    s.close()
+                    print("(+) Vacuumeter reader initialized")
+                    self.isInitialized = True
+                case "serial":
+                    s = serial.Serial(port=self.config["com_port"], baudrate=self.config["baudrate"], timeout=1.0)
+                    s.close()
+                    print("(+) Vacuumeter reader initialized")
+                    self.isInitialized = True
+                case _: 
+                    print(f"(!) This connection method {self.config["method"]} does no exists")
         except OSError as e:
             print("(!) Failed to initialize Vacuumeter reader:\t", e)
         
@@ -361,15 +369,26 @@ class VacuumeterERSTEVAK:
         data = 0 
         if self.isInitialized:
             try:
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.settimeout(1)
-                    s.connect((self.ip, self.port))
-                    s.send(self.ERSTVAK_command(self.address, 'M'))
-                    data = s.recv(1024).decode('ascii')
-                    mantissa = int(data[4:8]) / 1000
-                    exponent = int(data[8:10]) - 20
-                    data = mantissa * 10 ** exponent * 0.75  # torr
-            except:
+                match self.config["method"]:
+                    case "socket":
+                        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                            s.settimeout(1)
+                            s.connect((self.ip, self.port))
+                            s.send(self.ERSTVAK_command(self.config["address"], 'M'))
+                            data = s.recv(1024).decode('ascii')
+                            mantissa = int(data[4:8]) / 1000
+                            exponent = int(data[8:10]) - 20
+                            data = mantissa * 10 ** exponent * 0.75  # torr
+                    case "serial":
+                        with serial.Serial(port=self.config["com_port"], baudrate=self.config["baudrate"], timeout=1.0) as s:
+                            s.write(self.ERSTVAK_command(self.config["address"], 'M'))
+                            data = s.readall().decode('ascii')
+                            mantissa = int(data[4:8]) / 1000
+                            exponent = int(data[8:10]) - 20
+                            data = mantissa * 10 ** exponent * 0.75  # torr
+                    case _:
+                        data = 0
+            except Exception as e:
                 data = 0
         return data
 
@@ -377,43 +396,115 @@ class VacuumeterERSTEVAK:
         Ar = "c000160"
         He = "c000100"
         N2 = "c000100"
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(1)
-            s.connect((self.ip, self.port))
-            match gas:
-                case "Аргон": 
-                    s.sendall(self.ERSTVAK_command(self.address, "c1"))
-                    time.sleep(0.1)
-                    s.sendall(self.ERSTVAK_command(self.address, Ar))
-                case "Гелий": 
-                    s.sendall(self.ERSTVAK_command(self.address, "c1"))
-                    time.sleep(0.1)
-                    s.sendall(self.ERSTVAK_command(self.address, He))
-                case "Воздух": 
-                    s.sendall(self.ERSTVAK_command(self.address, "c1"))
-                    time.sleep(0.1)
-                    s.sendall(self.ERSTVAK_command(self.address, N2))
-    
-    def set_gas_s2(self, gas: str):
-        Ar = "c000160"
-        He = "c000100"
-        N2 = "c000100"
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(1)
-            s.connect((self.ip, self.port))
-            match gas:
-                case "Аргон": 
-                    s.sendall(self.ERSTVAK_command(self.address, "c2"))
-                    time.sleep(0.1)
-                    s.sendall(self.ERSTVAK_command(self.address, Ar))
-                case "Гелий": 
-                    s.sendall(self.ERSTVAK_command(self.address, "c2"))
-                    time.sleep(0.1)
-                    s.sendall(self.ERSTVAK_command(self.address, He))
-                case "Воздух": 
-                    s.sendall(self.ERSTVAK_command(self.address, "c2"))
-                    time.sleep(0.1)
-                    s.sendall(self.ERSTVAK_command(self.address, N2))
+        if self.isInitialized:
+            try:
+                match self.config["method"]:
+                    case "socket":
+                        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                            s.settimeout(1)
+                            s.connect((self.ip, self.port))
+                            match gas:
+                                case "Аргон":
+                                    match self.config["type"]:
+                                        case "pirani": 
+                                            s.sendall(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, Ar))
+                                        case "ionization":
+                                            s.sendall(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, Ar))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, "c2"))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, Ar))
+                                        case _:
+                                            pass
+                                case "Гелий": 
+                                    match self.config["type"]:
+                                        case "pirani":
+                                            s.sendall(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, He))
+                                        case "ionization":
+                                            s.sendall(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, He))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, "c2"))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, He))
+                                        case _:
+                                            pass
+                                case "Воздух": 
+                                    match self.config["type"]:
+                                        case "pirani":
+                                            s.sendall(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, N2))
+                                        case "ionization":
+                                            s.sendall(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, N2))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, "c2"))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, N2))
+                                        case _:
+                                            pass
+                    case "serial":
+                        with serial.Serial(port=self.config["com_port"], baudrate=self.config["baudrate"], timeout=1.0) as s:
+                            match gas:
+                                case "Аргон":
+                                    match self.config["type"]:
+                                        case "pirani": 
+                                            s.write(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, Ar))
+                                        case "ionization":
+                                            s.write(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, Ar))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, "c2"))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, Ar))
+                                        case _:
+                                            pass
+                                case "Гелий": 
+                                    match self.config["type"]:
+                                        case "pirani":
+                                            s.write(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, He))
+                                        case "ionization":
+                                            s.write(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, He))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, "c2"))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, He))
+                                        case _:
+                                            pass
+                                case "Воздух": 
+                                    match self.config["type"]:
+                                        case "pirani":
+                                            s.write(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, N2))
+                                        case "ionization":
+                                            s.write(self.ERSTVAK_command(self.address, "c1"))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, N2))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, "c2"))
+                                            time.sleep(0.1)
+                                            s.write(self.ERSTVAK_command(self.address, N2))
+                                        case _:
+                                            pass
+            except Exception as e:
+                pass
 
     def ERSTVAK_CRC64(self, command_full):
         crc = 0

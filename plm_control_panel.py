@@ -329,12 +329,6 @@ class PLMControl(QtWidgets.QMainWindow):
         self.currentTime = self.currentTime.addSecs(1)
         self.timeFormat = self.currentTime.toString('hh:mm:ss')
         self.ui_main.set_timer.setText(self.timeFormat)
-    
-    def _setup_graph(self, canvas: pyqtgraph.GraphicsLayoutWidget, row: int, col: int) -> pyqtgraph.PlotItem:
-        plot: pyqtgraph.PlotItem = canvas.addPlot(row=row, col=col)
-        plot.setAxisItems({'bottom': pyqtgraph.DateAxisItem()})
-        plot.showGrid(True, True)
-        return plot
 
     def init_graphs(self):
         self.instrument_plots: dict[str, Plot] = {
@@ -405,19 +399,10 @@ class PLMControl(QtWidgets.QMainWindow):
         self.thermocouple_channel_stop = int(self.config['Thermocouple'][0]['Channel_stop'])
         self.thermocouple_fast_read = float(self.config['Thermocouple'][0]['Fast_read'])
 
-        self.rrg_config = self.config["RRG"]
-
-        self.pressure_1_ip = self.config['Pressure1'][0]['ip']
-        self.pressure_1_port = int(self.config['Pressure1'][0]['port'])
-        self.pressure_1_address = int(self.config['Pressure1'][0]['address'])
-        
-        self.pressure_2_ip = self.config['Pressure2'][0]['ip']
-        self.pressure_2_port = int(self.config['Pressure2'][0]['port'])
-        self.pressure_2_address = int(self.config['Pressure2'][0]['address'])
-        
-        self.pressure_3_ip = self.config['Pressure3'][0]['ip']
-        self.pressure_3_port = int(self.config['Pressure3'][0]['port'])
-        self.pressure_3_address = int(self.config['Pressure3'][0]['address'])
+        self.rrg_config = self.config["RRG"][0]
+        self.pressure_1_config = self.config['Pressure1'][0]
+        self.pressure_2_config = self.config['Pressure2'][0]
+        self.pressure_3_config = self.config['Pressure3'][0]
 
         self.ui_main.set_u_sample.setMinimum(-int(self.config['sample_properties'][0]['Voltage_limit']))
         self.ui_main.set_u_sample.setMaximum(int(self.config['sample_properties'][0]['Voltage_limit']))
@@ -497,7 +482,7 @@ class PLMControl(QtWidgets.QMainWindow):
         if not self.cathode.isInitialized:
             self.ui_main.check_remote_cathode.setDisabled(True)
 
-        self.rrg = RRGInstrument(settings=self.rrg_config[0])
+        self.rrg = RRGInstrument(self.rrg_config)
         if not self.rrg.isInitialized:
             self.ui_main.set_rrg_state.setDisabled(True)
         else:
@@ -510,12 +495,9 @@ class PLMControl(QtWidgets.QMainWindow):
         for i in range(self.thermocouple_channel_stop - self.thermocouple_channel_start + 1):
             self.ui_main.thermocoples_table.insertRow(i)
 
-        self.pressure_1 = VacuumeterERSTEVAK(ip=self.pressure_1_ip, port=self.pressure_1_port,
-                                             address=self.pressure_1_address)
-        self.pressure_2 = VacuumeterERSTEVAK(ip=self.pressure_2_ip, port=self.pressure_2_port,
-                                             address=self.pressure_2_address)
-        self.pressure_3 = VacuumeterERSTEVAK(ip=self.pressure_3_ip, port=self.pressure_3_port,
-                                             address=self.pressure_3_address)
+        self.pressure_1 = VacuumeterERSTEVAK(self.pressure_1_config)
+        self.pressure_2 = VacuumeterERSTEVAK(self.pressure_2_config)
+        self.pressure_3 = VacuumeterERSTEVAK(self.pressure_3_config)
 
     def get_values(self, instruments: dict[str, float], thermocouples: dict[str, float], timestamp: float):
         sample_voltage = instruments['sample_voltage']
@@ -938,5 +920,4 @@ class PLMControl(QtWidgets.QMainWindow):
         gas = self.ui_main.set_gas.currentText()
         self.pressure_1.set_gas(gas)
         self.pressure_2.set_gas(gas)
-        self.pressure_2.set_gas_s2(gas)
         self.pressure_3.set_gas(gas)

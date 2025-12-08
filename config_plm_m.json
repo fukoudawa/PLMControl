@@ -69,23 +69,29 @@
     ],
     "Pressure1": [
         {
-		"ip": "192.168.10.106",
-    		"port": "501",
-    		"address": "1"
+		    "ip": "192.168.10.106",
+    		"port": 501,
+    		"address": 1,
+            "method": "socket",
+            "type": "pirani"
         }
     ],
     "Pressure2": [
         {
-		"ip": "192.168.10.106",
-    		"port": "502",
-    		"address": "2"
+		    "ip": "192.168.10.106",
+    		"port": 502,
+    		"address": 2,
+            "method": "socket",
+            "type": "ionization"
         }
     ],
     "Pressure3": [
         {
 		    "ip": "192.168.10.106",
-    		"port": "503",
-    		"address": "3"
+    		"port": 503,
+    		"address": 3,
+            "method": "socket",
+            "type": "pirani"
         }
     ]
 }
