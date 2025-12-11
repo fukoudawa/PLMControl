@@ -346,6 +346,7 @@ class VacuumeterERSTEVAK:
     def __init__(self, config: dict):
         self.config = config
         self.isInitialized = False
+        self.address = self.config["address"]
         try:
             match self.config["method"]:
                 case "socket":
@@ -373,7 +374,7 @@ class VacuumeterERSTEVAK:
                     case "socket":
                         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                             s.settimeout(1)
-                            s.connect((self.ip, self.port))
+                            s.connect((self.config["ip"], self.config["port"]))
                             s.send(self.ERSTVAK_command(self.config["address"], 'M'))
                             data = s.recv(1024).decode('ascii')
                             mantissa = int(data[4:8]) / 1000
@@ -389,6 +390,7 @@ class VacuumeterERSTEVAK:
                     case _:
                         data = 0
             except Exception as e:
+                print(e)
                 data = 0
         return data
 
@@ -402,22 +404,33 @@ class VacuumeterERSTEVAK:
                     case "socket":
                         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                             s.settimeout(1)
-                            s.connect((self.ip, self.port))
+                            s.connect((self.config["ip"], self.config["port"]))
                             match gas:
                                 case "Аргон":
+                                    print(gas)
                                     match self.config["type"]:
                                         case "pirani": 
+                                            print("pirani", gas)
+
                                             s.sendall(self.ERSTVAK_command(self.address, "c1"))
                                             time.sleep(0.1)
                                             s.sendall(self.ERSTVAK_command(self.address, Ar))
+                                            time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, "C1"))
+                                            print(s.recv(1024))
                                         case "ionization":
                                             s.sendall(self.ERSTVAK_command(self.address, "c1"))
                                             time.sleep(0.1)
                                             s.sendall(self.ERSTVAK_command(self.address, Ar))
                                             time.sleep(0.1)
+                                            s.sendall(self.ERSTVAK_command(self.address, "C1"))
+                                            print(s.recv(1024))
                                             s.sendall(self.ERSTVAK_command(self.address, "c2"))
                                             time.sleep(0.1)
                                             s.sendall(self.ERSTVAK_command(self.address, Ar))
+                                            s.sendall(self.ERSTVAK_command(self.address, "C2"))
+                                            print(s.recv(1024))
+
                                         case _:
                                             print(f"Vacuumeter type {self.config['type']} not found, gas Ar ")
                                 case "Гелий": 
@@ -505,7 +518,8 @@ class VacuumeterERSTEVAK:
                                         case _:
                                             pass
             except Exception as e:
-                pass
+                print(e)
+                return
 
     def ERSTVAK_CRC64(self, command_full):
         crc = 0

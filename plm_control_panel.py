@@ -133,6 +133,7 @@ class Reader(QtCore.QObject):
             instrument_data.update({"solenoid_voltage_1": self.solenoid_1.get_voltage()})
             instrument_data.update({"solenoid_current_2": self.solenoid_2.get_current()})
             instrument_data.update({"solenoid_voltage_2": self.solenoid_2.get_voltage()})
+            instrument_data.update({"solenoid_power_2": self.solenoid_2.get_power()})
             instrument_data.update({"cathode_current": self.cathode.get_current()})
             instrument_data.update({"cathode_voltage": self.cathode.get_voltage()})
             instrument_data.update({"cathode_power": self.cathode.get_power()})
@@ -230,6 +231,8 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_main.set_u_solenoid_slider_2.sliderReleased.connect(self.set_u_solenoid_2_slider)
         self.ui_main.set_i_solenoid_2.editingFinished.connect(self.set_i_solenoid_2)
         self.ui_main.set_i_solenoid_slider_2.sliderReleased.connect(self.set_i_solenoid_slider_2)
+        self.ui_main.set_p_solenoid_2.editingFinished.connect(self.set_p_solenoid_2)
+        self.ui_main.set_p_solenoid_slider_2.sliderReleased.connect(self.set_p_solenoid_slider_2)
 
         self.ui_main.check_local_cathode.stateChanged.connect(self.cathode_local)
         self.ui_main.check_remote_cathode.stateChanged.connect(self.cathode_remote)
@@ -247,7 +250,7 @@ class PLMControl(QtWidgets.QMainWindow):
 
         self.ui_main.set_rrg_state.currentIndexChanged.connect(self.set_rrg_state)
 
-        self.ui_main.set_gas.currentTextChanged.connect(self.set_gas)
+        # self.ui_main.set_gas.currentTextChanged.connect(self.set_gas)
 
     def __del__(self):
         self.reading_thread.terminate()
@@ -372,7 +375,7 @@ class PLMControl(QtWidgets.QMainWindow):
 
     def _init_settings(self):
         self.config = self._get_configs()
-
+        self.ui_main.set_gas.setDisabled(True)
         self.read_interval = float(self.config['Read_interval'])
         self.k = float(self.config['k_value'])
         self.graph_size = int(self.config['Graph_size'])
@@ -509,6 +512,7 @@ class PLMControl(QtWidgets.QMainWindow):
         solenoid_current_1 = instruments['solenoid_current_1']
         solenoid_voltage_2 = instruments['solenoid_voltage_2']
         solenoid_current_2 = instruments['solenoid_current_2']
+        solenoid_power_2 = instruments['solenoid_power_2']
         cathode_voltage = instruments['cathode_voltage']
         cathode_current = instruments['cathode_current']
         cathode_power = instruments['cathode_power']
@@ -527,6 +531,7 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_main.u_solenoid_actual_2.setText(str(solenoid_voltage_2))
         self.ui_main.i_solenoid_actual_1.setText(str(solenoid_current_1))
         self.ui_main.i_solenoid_actual_2.setText(str(solenoid_current_2))
+        self.ui_main.p_solenoid_actual_2.setText(str(solenoid_power_2))
         self.ui_main.u_cathode_actual.setText(str(cathode_voltage))
         self.ui_main.i_cathode_actual.setText(str(cathode_current))
         self.ui_main.p_cathode_actual.setText(str(cathode_power))
@@ -684,6 +689,7 @@ class PLMControl(QtWidgets.QMainWindow):
 
     def solenoid_2_local(self):
         if self.ui_main.check_local_solenoid_2.isChecked():
+            self.solenoid_2.set_mode_local()
             print('SOLENOID: SYSTEM:LOCAL')
             self.ui_main.check_remote_solenoid_2.setDisabled(False)
             self.ui_main.check_remote_solenoid_2.setChecked(False)
@@ -692,12 +698,15 @@ class PLMControl(QtWidgets.QMainWindow):
             self.ui_main.set_i_solenoid_slider_2.setDisabled(True)
             self.ui_main.set_u_solenoid_2.setDisabled(True)
             self.ui_main.set_u_solenoid_slider_2.setDisabled(True)
+            self.ui_main.set_p_solenoid_2.setDisabled(True)
+            self.ui_main.set_p_solenoid_slider_2.setDisabled(True)
             self.ui_main.solenoid_start_2.setDisabled(True)
             self.ui_main.solenoid_stop_2.setDisabled(True)
 
     def solenoid_2_remote(self):
         if self.ui_main.check_remote_solenoid_2.isChecked():
             print('SOLENOID: SYSTEM:REMOTE')
+            self.solenoid_2.set_mode_remote()
             self.ui_main.check_local_solenoid_2.setDisabled(False)
             self.ui_main.check_local_solenoid_2.setChecked(False)
             self.ui_main.check_remote_solenoid_2.setDisabled(True)
@@ -705,6 +714,8 @@ class PLMControl(QtWidgets.QMainWindow):
             self.ui_main.set_u_solenoid_slider_2.setDisabled(False)
             self.ui_main.set_i_solenoid_2.setDisabled(False)
             self.ui_main.set_i_solenoid_slider_2.setDisabled(False)
+            self.ui_main.set_p_solenoid_2.setDisabled(False)
+            self.ui_main.set_p_solenoid_slider_2.setDisabled(False)
             self.ui_main.solenoid_start_2.setDisabled(False)
             self.ui_main.solenoid_stop_2.setDisabled(False)
 
@@ -851,6 +862,16 @@ class PLMControl(QtWidgets.QMainWindow):
         self.i_solenoid_2 = round(self.ui_main.set_i_solenoid_slider_2.value(), 2)
         self.ui_main.set_i_solenoid_2.setValue(self.i_solenoid_2)
         self.solenoid_2.set_current(self.i_solenoid_2)
+    
+    def set_p_solenoid_2(self):
+        self.p_solenoid_2 = round(self.ui_main.set_p_solenoid_2.value(), 2)
+        self.ui_main.set_p_solenoid_slider_2.setValue(self.p_solenoid_2)
+        self.solenoid_2.set_power(self.p_solenoid_2)
+    
+    def set_p_solenoid_slider_2(self):
+        self.p_solenoid_2 = round(self.ui_main.set_p_solenoid_slider_2.value(), 2)
+        self.ui_main.set_i_solenoid_2.setValue(self.p_solenoid_2)
+        self.solenoid_2.set_power(self.p_solenoid_2)
 
     def set_u_cathode(self):
         self.u_cathode = round(self.ui_main.set_u_cathode.value(), 2)

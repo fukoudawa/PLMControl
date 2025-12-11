@@ -1,5 +1,5 @@
 {
-    "Read_interval": "1",
+    "Read_interval": "1000",
     "k_value": "165.0",
     "Graph_size": "1000",
     "Path_to_write": "./Data",
@@ -68,21 +68,21 @@
     "Pressure1": [
         {
 		    "ip": "192.168.10.13",
-    		"port": "501",
+    		"port": "23",
     		"address": "1"
         }
     ],
     "Pressure2": [
         {
 		    "ip": "192.168.10.13",
-    		"port": "501",
+    		"port": "23",
     		"address": "2"
         }
     ],
     "Pressure3": [
         {
 		    "ip": "192.168.10.13",
-    		"port": "501",
+    		"port": "23",
     		"address": "3"
         }
     ]
