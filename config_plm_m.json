@@ -52,8 +52,9 @@
         }
     ],
     "RRG": [
-        {
-            "port": "COM7",
+        {   
+            "method": "rtu",
+            "port": "COM9",
             "baudrate": 19200,
             "unit": 2
         }

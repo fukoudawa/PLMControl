@@ -123,7 +123,7 @@ class Reader(QtCore.QObject):
             thermocouple_data = {}
             
             # ----------------------- Publish the data --------------------------------
-            start_instruments = time.perf_counter()
+            start_sample = time.perf_counter()
             instrument_data.update({"sample_current": self.sample.get_current()})
             instrument_data.update({"sample_voltage": self.sample.get_voltage()})
             instrument_data.update({"discharge_current": self.discharge.get_current()})
@@ -163,10 +163,10 @@ class Reader(QtCore.QObject):
             self.client.publish(timestamp, "timestamp")
 
             self.client.disconnect()
-            if datetime.now() < deadline:
-                pass
+            # if datetime.now() < deadline:
+            #     pass
             end = time.perf_counter()
-            print(f"Target reader cycle: {self.read_interval}, got {end - start}")
+            print(f"Target reader cycle: {round(float(self.read_interval*1e-3), 2)}, got {end - start}")
 
 class PLMControl(QtWidgets.QMainWindow):
 
@@ -250,7 +250,7 @@ class PLMControl(QtWidgets.QMainWindow):
 
         self.ui_main.set_rrg_state.currentIndexChanged.connect(self.set_rrg_state)
 
-        # self.ui_main.set_gas.currentTextChanged.connect(self.set_gas)
+        self.ui_main.set_gas.currentTextChanged.connect(self.set_gas)
 
     def __del__(self):
         self.reading_thread.terminate()
@@ -375,7 +375,7 @@ class PLMControl(QtWidgets.QMainWindow):
 
     def _init_settings(self):
         self.config = self._get_configs()
-        self.ui_main.set_gas.setDisabled(True)
+        self.ui_main.set_gas.setDisabled(False)
         self.read_interval = float(self.config['Read_interval'])
         self.k = float(self.config['k_value'])
         self.graph_size = int(self.config['Graph_size'])
@@ -925,8 +925,8 @@ class PLMControl(QtWidgets.QMainWindow):
             self.ui_main.set_rrg.setDisabled(False)
             self.ui_main.set_rrg_slider.setDisabled(False)
             # TODO: setValue to maximum displayable value
-            self.ui_main.set_rrg.setValue(100)
-            self.ui_main.set_rrg_slider.setValue(100)
+            self.ui_main.set_rrg.setValue(300)
+            self.ui_main.set_rrg_slider.setValue(300)
         if state == 1:
             self.ui_main.set_rrg.setDisabled(True)
             self.ui_main.set_rrg_slider.setDisabled(True)

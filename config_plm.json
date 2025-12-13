@@ -50,10 +50,11 @@
         }
     ],
     "RRG": [
-        {
-            "port": "COM3",
-            "Baudrate": "19200",
-            "Address": "2"
+        {   
+            "method": "socket",
+            "host": "192.168.10.13",
+            "port": 24,
+            "unit": 2
         }
     ],
     "Thermocouple": [
@@ -61,29 +62,35 @@
             "Path": "cDAQ9189-1CA7F2BMod5",
             "Array_size": "1000",
             "Channel_start": "0",
-            "Channel_stop": "15",
+            "Channel_stop": "1",
             "Fast_read": "0.1"
         }
     ],
     "Pressure1": [
         {
 		    "ip": "192.168.10.13",
-    		"port": "23",
-    		"address": "1"
+    		"port": 23,
+    		"address": 1,
+            "method": "socket",
+            "type": "ionization"
         }
     ],
     "Pressure2": [
         {
 		    "ip": "192.168.10.13",
-    		"port": "23",
-    		"address": "2"
+    		"port": 23,
+    		"address": 2,
+            "method": "socket",
+            "type": "pirani"
         }
     ],
     "Pressure3": [
         {
 		    "ip": "192.168.10.13",
-    		"port": "23",
-    		"address": "3"
+    		"port": 23,
+    		"address": 6,
+            "method": "socket",
+            "type": "pirani"
         }
     ]
 }

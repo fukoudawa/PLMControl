@@ -1,6 +1,6 @@
 from nidaqmx import Task, constants
 from pymodbus.client import ModbusSerialClient, ModbusTcpClient
-from pymodbus.framer import FramerRTU
+from pymodbus import FramerType
 import socket
 import time
 import serial
@@ -73,27 +73,36 @@ class SCPIInstrument:
         """
         Возвращает текущее напряжение на источнике питания
         """
-        try:
-            return round(float(self._query('MEASURE:VOLTAGE?').strip('\x00')), 2)
-        except:
+        if self.isInitialized:
+            try:
+                return round(float(self._query('MEASURE:VOLTAGE?').strip('\x00')), 2)
+            except:
+                return 0.0
+        else:
             return 0.0
 
     def get_current(self):
         """
         Возвращает текущий ток на источнике питания
         """
-        try:
-            return round(float(self._query('MEASURE:CURRENT?').strip('\x00')), 2)
-        except:
+        if self.isInitialized:
+            try:
+                return round(float(self._query('MEASURE:CURRENT?').strip('\x00')), 2)
+            except:
+                return 0.0
+        else:
             return 0.0
 
     def get_power(self):
         """
         Возвращает текущую мощность на источнике питания
         """
-        try:
-            return round(float(self._query('MEASURE:POWER?').strip('\x00')), 2)
-        except:
+        if self.isInitialized:
+            try:
+                return round(float(self._query('MEASURE:POWER?').strip('\x00')), 2)
+            except:
+                return 0.0
+        else:
             return 0.0
 
     def get_identification(self):
@@ -149,26 +158,24 @@ class SCPIInstrument:
 class RRGInstrument:
     # TODO: РРГ сломался, затем нужно поменять конструкцию, чтобы флаг isInitialized устанавливался без ошибок
     def __init__(self, config: dict):
-        self.isInitialized = bool()
+        self.isInitialized = False
+        self.client = None
         self.unit = config["unit"]
-        try:
-            match config["method"]:
-                case "rtu":
-                    self.client = ModbusSerialClient(port=config["port"], baudrate=config["baudrate"])
-                    self.client.connect()
-                case "tcp":
-                    self.client = ModbusTcpClient(host= config["host"], port=config["port"], framer=FramerRTU)
-                    self.client.connect()
-            if self.client is not None:
-                self.isInitialized = True
-                print("(+) RRG initialized")
-            else:
-                self.isInitialized = False
-        except Exception as e:
+        match config["method"]:
+            case "rtu":
+                self.client = ModbusSerialClient(port=config["port"], baudrate=config["baudrate"])
+            case "socket":
+                self.client = ModbusTcpClient(host=config["host"], port=config["port"], framer=FramerType.RTU)
+            case _:
+                print("Unknown RRG connection method")
+                return
+        if self.client.connect():
+            print("(+) RRG initialized")
+            self.isInitialized = True
+        else:
+            print("(!) RRG failed to initialize")
             self.isInitialized = False
-            self.client = None
-            print("(!) Failed to initialize RRG:\t", e)
-    
+
     def __del__(self):
         if self.isInitialized:
             self.client.close()
@@ -246,10 +253,10 @@ class RRGInstrument:
             self.flag_1 = map(str, self.flag_1_int)
             self.flag_1 = ''.join(self.flag_1)
             self.flag_1 = int(self.flag_1, 2)
-            self.client.write_register(2, self.flag_1, self.unit) 
-        except Exception:
+            self.client.write_register(address=2, value=self.flag_1, device_id=self.unit) 
+        except Exception as e:
             if self.isInitialized:
-                print('(ERROR) RRG: Set state has failed')
+                print(f'(ERROR) RRG: Set state has failed: reasone {e}')
 
     def set_flow(self, value: int):
         try:
@@ -398,6 +405,7 @@ class VacuumeterERSTEVAK:
         Ar = "c000160"
         He = "c000100"
         N2 = "c000100"
+        sleep_time = 0.2
         if self.isInitialized:
             try:
                 match self.config["method"]:
@@ -410,62 +418,57 @@ class VacuumeterERSTEVAK:
                                     print(gas)
                                     match self.config["type"]:
                                         case "pirani": 
-                                            print("pirani", gas)
-
                                             s.sendall(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, Ar))
-                                            time.sleep(0.1)
-                                            s.sendall(self.ERSTVAK_command(self.address, "C1"))
-                                            print(s.recv(1024))
+                                            time.sleep(sleep_time)
                                         case "ionization":
                                             s.sendall(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, Ar))
-                                            time.sleep(0.1)
-                                            s.sendall(self.ERSTVAK_command(self.address, "C1"))
-                                            print(s.recv(1024))
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, "c2"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, Ar))
-                                            s.sendall(self.ERSTVAK_command(self.address, "C2"))
-                                            print(s.recv(1024))
-
+                                            time.sleep(sleep_time)
                                         case _:
                                             print(f"Vacuumeter type {self.config['type']} not found, gas Ar ")
                                 case "Гелий": 
                                     match self.config["type"]:
                                         case "pirani":
                                             s.sendall(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, He))
+                                            time.sleep(sleep_time)
                                         case "ionization":
                                             s.sendall(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, He))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, "c2"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, He))
+                                            time.sleep(sleep_time)
                                         case _:
                                             print(f"Vacuumeter type {self.config['type']} not found, gas He ")
                                 case "Воздух": 
                                     match self.config["type"]:
                                         case "pirani":
                                             s.sendall(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, N2))
+                                            time.sleep(sleep_time)
                                         case "ionization":
                                             s.sendall(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, N2))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, "c2"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.sendall(self.ERSTVAK_command(self.address, N2))
+                                            time.sleep(sleep_time)
                                         case _:
                                             print(f"Vacuumeter type {self.config['type']} not found, gas N2 ")
-
                     case "serial":
                         with serial.Serial(port=self.config["com_port"], baudrate=self.config["baudrate"], timeout=1.0) as s:
                             match gas:
@@ -473,48 +476,54 @@ class VacuumeterERSTEVAK:
                                     match self.config["type"]:
                                         case "pirani": 
                                             s.write(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, Ar))
+                                            time.sleep(sleep_time)
                                         case "ionization":
                                             s.write(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, Ar))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, "c2"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, Ar))
+                                            time.sleep(sleep_time)
                                         case _:
                                             pass
                                 case "Гелий": 
                                     match self.config["type"]:
                                         case "pirani":
                                             s.write(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, He))
+                                            time.sleep(sleep_time)
                                         case "ionization":
                                             s.write(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, He))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, "c2"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, He))
+                                            time.sleep(sleep_time)
                                         case _:
                                             pass
                                 case "Воздух": 
                                     match self.config["type"]:
                                         case "pirani":
                                             s.write(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, N2))
+                                            time.sleep(sleep_time)
                                         case "ionization":
                                             s.write(self.ERSTVAK_command(self.address, "c1"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, N2))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, "c2"))
-                                            time.sleep(0.1)
+                                            time.sleep(sleep_time)
                                             s.write(self.ERSTVAK_command(self.address, N2))
+                                            time.sleep(sleep_time)
                                         case _:
                                             pass
             except Exception as e:
